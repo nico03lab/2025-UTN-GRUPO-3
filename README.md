@@ -1,20 +1,19 @@
 # 2025-UTN-GRUPO-3
+Proyecto de la materia desarrollo de software, año 2025, comision S-32.
 
 ## Integrantes: 
-Martinez Yanina Fatima Ester 
-Ciardulo Geraldine
-Laborde Nicolas
-Morinigo Roger
-
-## Descripción del Proyecto
+Martinez Yanina Fatima Ester  
+Ciardulo Geraldine  
+Laborde Nicolas  
+Morinigo Roger  
 
 ## Plataforma/Tipo de app: Web
 
 ## Lenguajes de Programación:
-Frontend: React
-Backend: Node.js
-Base de Datos: SQLite
-
+Frontend: React  
+Backend: Node.js  
+Base de Datos: SQLite  
+   
 ## Idea propuesta:
 Desarrollo de un software de gestión escolar enfocado en una única institución educativa (nivel primario y secundario).
 La plataforma permitirá llevar a cabo las inscripciones y gestión de vacantes de manera organizada y digital, evitando que familias queden sin vacante por problemas administrativos.
@@ -49,7 +48,7 @@ Visualización en tiempo real de la disponibilidad de vacantes.
 
 Reportes de inscripciones y asignaciones.
 
-### Seguimiento académico y comunicación (futuro módulo)
+### Seguimiento académico y comunicación
 
 Acceso de los padres a notas, asistencias y horarios en tiempo real.
 
