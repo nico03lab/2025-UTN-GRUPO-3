@@ -24,7 +24,7 @@ const AsistenciaForm = () => {
   // Obtener alumnos del curso seleccionado
   useEffect(() => {
     if (selectedCurso) {
-      axios.get(`http://localhost:3002/alumnos-por-curso/${selectedCurso}`)
+      axios.get(`http://localhost:3002/alumnos/${selectedCurso}`)
         .then(res => {
           setAlumnos(res.data);
           const initAsistencia = {};

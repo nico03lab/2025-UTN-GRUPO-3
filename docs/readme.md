@@ -9,7 +9,7 @@
 
 ```
 DB_PATH=./db/sistema_escolar.db
-PORT=3002`
+PORT=3002
 ```
 
 
