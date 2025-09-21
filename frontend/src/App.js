@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import AsistenciaPage from './pages/AsistenciaPage'; // tu page
+import TeacherDashboard from './components/TeacherDashboard';
 
 function App() {
   return (
@@ -22,6 +23,11 @@ function App() {
                     Ir a Asistencias
                   </button>
                 </Link>
+                <Link to="/TeacherDashboard">
+                  <button className="App-link bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded">
+                    Ir a Panel docente
+                  </button>
+                </Link>
               </header>
             </div>
           }
@@ -29,6 +35,7 @@ function App() {
 
         {/* Ruta de tu page de asistencia */}
         <Route path="/asistencia" element={<AsistenciaPage />} />
+        <Route path="/TeacherDashboard" element={<TeacherDashboard />} />
       </Routes>
     </Router>
   );
