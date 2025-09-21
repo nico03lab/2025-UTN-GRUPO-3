@@ -8,5 +8,8 @@ const getCursos = (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const getCursoByNivelYTurno = (nivel, turno)=>{
+  return db.prepare('SELECT * FROM Cursos WHERE Nivel = ? AND Turno = ?').get(nivel, turno);
+}
 
-module.exports = { getCursos };
+module.exports = { getCursos, getCursoByNivelYTurno };
