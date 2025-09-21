@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT ;
 
 //Middlewares
 
@@ -15,6 +15,8 @@ app.use(express.json());
 app.use('/cursos', require('./routes/cursosRoutes'));
 app.use('/alumnos', require('./routes/alumnosRoutes'));
 app.use('/asistencias', require('./routes/asistenciasRoutes'));
+app.use('/inscripcion', require('./routes/inscripcionRoutes'));
+
 
 
 app.listen(PORT, () => {
