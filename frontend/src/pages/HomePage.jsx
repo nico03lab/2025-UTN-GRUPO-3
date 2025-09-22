@@ -6,8 +6,6 @@ export const HomePage = () => {
         <CardNota texto="Asistencia" path="/asistencia" descripcion="Pasar asitencia a un curso (back)"/>
         <CardNota texto="Inscripcion" path="/inscripcion" descripcion="Gestion de inscripciones"/>
         <CardNota texto="Docente" path="/docente" descripcion="Vista de profesores"/>
-
     </div>
-    
   );
 };
