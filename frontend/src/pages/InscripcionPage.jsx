@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { InscriptionHeader } from '../components/InscriptionHeader';
 import { InscripcionForm } from '../components/InscripcionForm';
-import { StepsInscription } from '../components/StepsInscription';
 import {ToastContainer} from "react-toastify";
 
 export const InscripcionPage = () => {

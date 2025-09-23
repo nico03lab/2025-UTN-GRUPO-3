@@ -1,4 +1,4 @@
-import { InputField } from "./InputField"
+import { InputField } from "./InputField";
 import { InscriptionHeader } from "./InscriptionHeader";
 import { StepsInscription } from "./StepsInscription";
 import { NavigationFooter } from "./NavidationField";
