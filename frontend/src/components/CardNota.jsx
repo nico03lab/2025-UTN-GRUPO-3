@@ -29,3 +29,4 @@ const CardNota = ({ texto, path, descripcion, icon: Icon }) => {
 
 
 export default CardNota;
+
