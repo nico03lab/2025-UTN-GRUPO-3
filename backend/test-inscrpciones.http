@@ -12,6 +12,7 @@ Content-Type: application/json
         "numero": "1",
         "localidad": "Junin",
         "provincia": "Buenos Aires",
+        "telefono": "123564",
         "email": "santiago.fernandez@email.com"
     },
     "tutor":{
