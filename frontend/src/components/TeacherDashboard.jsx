@@ -5,21 +5,34 @@ import GradesTab from './GradesTab';
 import UserHeader from "../components/UserHeader";
 import CourseSidebar from "../components/CourseSidebar";
 import StatsPanel from "../components/Statspanel";
+import axios from 'axios';
 
 export default function TeacherDashboard() {
   // Estados
   const [user] = useState({ 
+    dni: '30111222',
+    id: 'doc-001',
     name: 'Prof. Martín López', 
     email: 'm.lopez@colegio.edu'
   });
   
-  const [cursos] = useState([
-    { IdCurso: 1, Nivel: '1º A', Materia: 'Matemática', color: 'primary', alumnos: 28 },
-    { IdCurso: 2, Nivel: '2º B', Materia: 'Historia', color: 'secondary', alumnos: 24 },
-    { IdCurso: 3, Nivel: '3º C', Materia: 'Física', color: 'accent', alumnos: 26 }
-  ]);
+  const [cursos, setCursos] = useState([]);
 
-  const [selectedCurso, setSelectedCurso] = useState(cursos[0].IdCurso);
+useEffect(() => {
+  axios.get(`http://localhost:3002/api/cursos/${user.dni}`)
+    .then(res => setCursos(res.data))
+    .catch(err => console.error(err));
+}, [user.dni]);
+
+const [selectedCurso, setSelectedCurso] = useState(null);
+
+useEffect(() => {
+  if (cursos.length > 0 && !selectedCurso) {
+    setSelectedCurso(cursos[0].IdCurso);
+  }
+}, [cursos, selectedCurso]);
+
+
   const [tab, setTab] = useState('attendance');
   const [alumnosByCurso, setAlumnosByCurso] = useState({});
   const [attendance, setAttendance] = useState({});
@@ -27,36 +40,22 @@ export default function TeacherDashboard() {
   const [theme, setTheme] = useState('light');
   const [notifications] = useState(3);
 
-  // Datos de ejemplo con fotos de perfil
+  // Obtener alumnos del curso seleccionado
   useEffect(() => {
-    setAlumnosByCurso({
-      1: [
-        { DNI: '20123456', Apellido: 'García', Nombres: 'Lucía', Avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '20345678', Apellido: 'Fernández', Nombres: 'Bruno', Avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '20456789', Apellido: 'Sánchez', Nombres: 'María', Avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '20567890', Apellido: 'Pérez', Nombres: 'Sofía', Avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '20678901', Apellido: 'Torres', Nombres: 'Diego', Avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' }
-      ],
-      2: [
-        { DNI: '20789012', Apellido: 'Romero', Nombres: 'Paula', Avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '20890123', Apellido: 'López', Nombres: 'Mateo', Avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '20901234', Apellido: 'Rossi', Nombres: 'Camila', Avatar: 'https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' }
-      ],
-      3: [
-        { DNI: '21012345', Apellido: 'Gómez', Nombres: 'Juan', Avatar: 'https://images.unsplash.com/photo-1508341591423-4347099e1f19?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '21123456', Apellido: 'Díaz', Nombres: 'Valentina', Avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '21234567', Apellido: 'Martínez', Nombres: 'Thiago', Avatar: 'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' },
-        { DNI: '21345678', Apellido: 'Alvarez', Nombres: 'Emma', Avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=128&q=80' }
-      ]
-    });
-  }, []);
-
-  useEffect(() => {
-    const list = alumnosByCurso[selectedCurso] || [];
-    const init = {};
-    list.forEach(a => (init[a.DNI] = false));
-    setAttendance(init);
-  }, [selectedCurso, alumnosByCurso]);
+    if (selectedCurso) {
+      axios.get(`http://localhost:3002/api/alumnos/${selectedCurso}`)
+        .then(res => {
+          setAlumnosByCurso(res.data);
+          const initAttendance = {};
+          res.data.forEach(a => initAttendance[a.DNI] = false);
+          setAttendance(initAttendance);
+        })
+        .catch(err => console.error(err));
+    } else {
+      setAlumnosByCurso([]);
+      setAttendance({});
+    }
+  }, [selectedCurso]);
 
   useEffect(() => {
     const list = alumnosByCurso[selectedCurso] || [];
@@ -163,7 +162,7 @@ export default function TeacherDashboard() {
               {/* Tabs content */}
               {tab === 'attendance' && (
                 <AttendanceTab 
-                    alumnos={alumnosByCurso[selectedCurso] || []}
+                    alumnos={alumnosByCurso}
                     attendance={attendance}
                     toggleAttendance={toggleAttendance}
                     saveAttendance={saveAttendance}
@@ -177,7 +176,7 @@ export default function TeacherDashboard() {
 
               {tab === 'grades' && (
                 <GradesTab 
-                  alumnos={alumnosByCurso[selectedCurso] || []}
+                  alumnos={alumnosByCurso}
                   grades={grades}
                   setGrade={setGrade}
                   setObs={setObs}

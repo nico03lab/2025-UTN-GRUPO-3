@@ -17,8 +17,8 @@ const getAlumnosPorCurso = (req, res) => {
     const alumnos = db.prepare(`
       SELECT a.DNI, a.Apellido, a.Nombres
       FROM Alumnos a
-      JOIN Inscripciones i ON a.DNI = i.DNIAlumno
-      WHERE i.IdCurso = ?
+      JOIN Cursos c ON c.IdCurso = a.IdCurso
+      WHERE c.IdCurso = ?
     `).all(idCurso);
     res.json(alumnos);
   } catch (err) {
