@@ -78,7 +78,7 @@ const DashboardDirectivo = () => {
     <div
       className={`min-h-screen w-full ${theme === "light" ? "bg-gray-100" : "bg-gray-800"} relative`}
       style={{
-        backgroundImage: "url('/cole.svg')",
+        backgroundImage: "url()",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
