@@ -52,6 +52,7 @@ export const HomePage = () => {
         <CardNota texto="Estudiantes" path="/estudiantes" descripcion="Portal de estudiantes y padres" icon={GraduationCap}/>
         <CardNota texto="Directivos" path="/directivos" descripcion="Portal de directivos" icon={UserLock}/>
         <CardNota texto="Asistencia" path="/asistencia" descripcion="Pasar asitencia a un curso (back)" icon={BookUser} />
+        <CardNota textp="Solicitudes" path="/solicitudes" descripcion="Detalles de solicitudes" icon={BookUser} />
 
       </div>
     </div>
