@@ -3,7 +3,7 @@ const db = require('../db/db');
 const getCursosPorProfe = (req, res) => {
   const { DNIDocente } = req.params;
   try {
-    const cursos = db.prepare(`SELECT c.IdCurso FROM Cursos c
+    const cursos = db.prepare(`SELECT c.IdCurso, c.Nivel, c.Letra, c.Grado FROM Cursos c
                               JOIN CursoMateria cm ON cm.IdCurso = c.IdCurso
                               WHERE cm.DNIDocente = ?;
                               `).all(DNIDocente);

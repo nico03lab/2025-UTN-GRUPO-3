@@ -153,8 +153,9 @@ CREATE TABLE HorarioMateria (
     DiaSemana TEXT NOT NULL,
     HoraInicio TEXT NOT NULL,
     HoraFin TEXT NOT NULL,
-    IdAula INTEGER NULL,
+    NumAula INTEGER NULL,
     PRIMARY KEY (IdCurso, IdMateria, DiaSemana),
+    FOREIGN KEY (NumAula) REFERENCES Aulas(NumAula),
     FOREIGN KEY (IdCurso) REFERENCES Cursos(IdCurso),
     FOREIGN KEY (IdMateria) REFERENCES Materias(IdMateria)
 );

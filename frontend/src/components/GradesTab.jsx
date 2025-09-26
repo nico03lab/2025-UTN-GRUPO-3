@@ -24,7 +24,7 @@ export default function GradesTab({ alumnos, grades, setGrade, setObs, saveGrade
                   <div className="flex items-center gap-3">
                     <div className="avatar">
                       <div className="w-12 rounded-full">
-                        <img src={a.Avatar} alt={`${a.Nombres} ${a.Apellido}`} />
+                        <img src={'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'} alt={`${a.Nombres} ${a.Apellido}`} />
                       </div>
                     </div>
                     <div>
@@ -72,7 +72,7 @@ export default function GradesTab({ alumnos, grades, setGrade, setObs, saveGrade
         <button 
           onClick={() => { 
             const init = {}; 
-            alumnos.forEach(a => init[a.DNI] = { nota: '', obs: '' }); 
+            alumnos.forEach(a => init[a.DNIAlumno] = { nota: '', obs: '' }); 
             setGrades(init); 
           }} 
           className="btn btn-outline"
