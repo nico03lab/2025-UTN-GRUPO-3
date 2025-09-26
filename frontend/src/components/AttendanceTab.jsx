@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheckCircleIcon, DocumentCheckIcon } from '@heroicons/react/24/outline';
 
 export default function AttendanceTab({ alumnos, attendance, toggleAttendance, saveAttendance, setAttendance }) {
@@ -20,31 +19,31 @@ export default function AttendanceTab({ alumnos, attendance, toggleAttendance, s
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {alumnos.map(a => (
+        {Array.isArray(alumnos) && alumnos.map(a => (
           <div 
-            key={a.DNI}
+            key={a.DNIAlumno}
             className={`p-3 rounded-box border flex items-center justify-between ${
-              attendance[a.DNI] ? 'bg-success bg-opacity-10 border-success' : 'bg-error bg-opacity-10 border-error'
+              attendance[a.DNIAlumno] ? 'bg-success bg-opacity-10 border-success' : 'bg-error bg-opacity-10 border-error'
             }`}
           >
             <div className="flex items-center gap-3">
               <div className="avatar">
                 <div className="w-12 rounded-full">
-                  <img src={a.Avatar} alt={`${a.Nombres} ${a.Apellido}`} />
+                  <img src={'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'} alt={`${a.Nombres} ${a.Apellido}`} />
                 </div>
               </div>
               <div>
                 <div className="font-medium">{a.Apellido}, {a.Nombres}</div>
-                <div className="text-xs opacity-70">DNI: {a.DNI}</div>
+                <div className="text-xs opacity-70">DNI: {a.DNIAlumno}</div>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <label className="text-sm">{attendance[a.DNI] ? 'Presente ✅' : 'Ausente ❌'}</label>
+              <label className="text-sm">{attendance[a.DNIAlumno] ? 'Presente ✅' : 'Ausente ❌'}</label>
               <input 
                 type="checkbox" 
                 className="toggle toggle-success"
-                checked={!!attendance[a.DNI]} 
-                onChange={() => toggleAttendance(a.DNI)} 
+                checked={!!attendance[a.DNIAlumno]} 
+                onChange={() => toggleAttendance(a.DNIAlumno)} 
               />
             </div>
           </div>
@@ -59,7 +58,7 @@ export default function AttendanceTab({ alumnos, attendance, toggleAttendance, s
         <button 
           onClick={() => { 
             const init = {}; 
-            alumnos.forEach(a => init[a.DNI] = false); 
+            alumnos.forEach(a => init[a.DNIAlumno] = false); 
             setAttendance(init); 
           }} 
           className="btn btn-outline"
