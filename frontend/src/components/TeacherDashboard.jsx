@@ -8,47 +8,53 @@ import StatsPanel from "../components/Statspanel";
 import axios from 'axios';
 
 export default function TeacherDashboard() {
-  // Estados
+  
   const [user] = useState({ 
     dni: '30111222',
     id: 'doc-001',
     name: 'Prof. Martín López', 
     email: 'm.lopez@colegio.edu'
   });
+
+  const API_BASE_URL = 'http://localhost:3002/api';
   
   const [cursos, setCursos] = useState([]);
-
-useEffect(() => {
-  axios.get(`http://localhost:3002/api/cursos/${user.dni}`)
-    .then(res => setCursos(res.data))
-    .catch(err => console.error(err));
-}, [user.dni]);
-
-const [selectedCurso, setSelectedCurso] = useState(null);
-
-useEffect(() => {
-  if (cursos.length > 0 && !selectedCurso) {
-    setSelectedCurso(cursos[0].IdCurso);
-  }
-}, [cursos, selectedCurso]);
-
-
+  const [selectedCurso, setSelectedCurso] = useState(null);
   const [tab, setTab] = useState('attendance');
-  const [alumnosByCurso, setAlumnosByCurso] = useState({});
+  const [alumnosByCurso, setAlumnosByCurso] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [grades, setGrades] = useState({});
   const [theme, setTheme] = useState('light');
   const [notifications] = useState(3);
 
-  // Obtener alumnos del curso seleccionado
+  useEffect(() => {
+      axios.get(`${API_BASE_URL}/cursos/${user.dni}`)
+        .then(res => {
+          console.log('✅ Cursos obtenidos:', res.data);
+          setCursos(res.data);
+          if (res.data.length > 0) {
+            setSelectedCurso(res.data[0].IdCurso);
+          }
+        })
+        .catch(err => console.error('❌ Error al obtener cursos:', err));
+    }, [user.dni])
+
+  //Funcion para alternar el estado de la asistencia
+  const toggleAttendance = (dniAlumno) => {
+    setAttendance((prevAttendance) => ({
+      ...prevAttendance,          
+      [dniAlumno]: !prevAttendance[dniAlumno]  
+    }));
+  };
+
   useEffect(() => {
     if (selectedCurso) {
-      axios.get(`http://localhost:3002/api/alumnos/${selectedCurso}`)
+      axios.get(`${API_BASE_URL}/alumnos/${selectedCurso}`)
         .then(res => {
-          setAlumnosByCurso(res.data);
           const initAttendance = {};
-          res.data.forEach(a => initAttendance[a.DNI] = false);
+          res.data.forEach(a => initAttendance[a.DNIAlumno] = false);
           setAttendance(initAttendance);
+          setAlumnosByCurso(res.data);
         })
         .catch(err => console.error(err));
     } else {
@@ -57,17 +63,7 @@ useEffect(() => {
     }
   }, [selectedCurso]);
 
-  useEffect(() => {
-    const list = alumnosByCurso[selectedCurso] || [];
-    const init = {};
-    list.forEach(a => (init[a.DNI] = { nota: '', obs: '' }));
-    setGrades(init);
-  }, [selectedCurso, alumnosByCurso]);
-
-  const toggleAttendance = (dni) => {
-    setAttendance(prev => ({ ...prev, [dni]: !prev[dni] }));
-  };
-
+  //Falta implementacion backend con tabla Asistencias
   const saveAttendance = () => {
     const payload = {
       curso: selectedCurso,
@@ -81,6 +77,7 @@ useEffect(() => {
     setTimeout(() => toast.classList.remove('show'), 3000);
   };
 
+  //Implementar backend con tabla Boletines
   const setGrade = (dni, value) => {
     setGrades(prev => ({ ...prev, [dni]: { ...prev[dni], nota: value } }));
   };
@@ -171,7 +168,7 @@ useEffect(() => {
               )}
 
               {tab === 'schedule' && (
-                <ScheduleTab horarios={horarios[selectedCurso] || []} />
+                <ScheduleTab horarios={horarios[1] || []} />
               )}
 
               {tab === 'grades' && (

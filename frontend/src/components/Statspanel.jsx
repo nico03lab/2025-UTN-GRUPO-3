@@ -11,7 +11,7 @@ export default function StatsPanel({ stats }) {
             <UserGroupIcon className="h-5 w-5 text-primary" />
             <span className="text-sm">Total alumnos</span>
           </div>
-          <span className="font-semibold text-primary">{stats.totalAlumnos}</span>
+          <span className="font-semibold text-primary">14</span>
         </div>
         
         <div className="flex items-center justify-between p-2 rounded-box bg-success bg-opacity-20">

@@ -21,3 +21,20 @@ PORT=3002
 ### Levantar el frontend:
 
 `npm start`
+
+
+## Base de datos
+
+### Modificaciones
+
+Modificar estructura en el archivo /backend/db/schema_update.sql.
+Actualizar el archivo /backend/db/seed-data.js
+
+### Nueva DB
+Para generar nuevo archivo db, ejecutar el script seed-data.js desde el directorio /backend:
+
+`2025-UTN-GRUPO-3\backend> node db/scripts/seed-data.js`
+
+### Modelo Relacional Actual
+
+![Texto alternativo](./diagrams/ModeloRelacional.png)

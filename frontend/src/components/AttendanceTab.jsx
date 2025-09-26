@@ -21,9 +21,9 @@ export default function AttendanceTab({ alumnos, attendance, toggleAttendance, s
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {Array.isArray(alumnos) && alumnos.map(a => (
           <div 
-            key={a.DNI}
+            key={a.DNIAlumno}
             className={`p-3 rounded-box border flex items-center justify-between ${
-              attendance[a.DNI] ? 'bg-success bg-opacity-10 border-success' : 'bg-error bg-opacity-10 border-error'
+              attendance[a.DNIAlumno] ? 'bg-success bg-opacity-10 border-success' : 'bg-error bg-opacity-10 border-error'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -34,16 +34,16 @@ export default function AttendanceTab({ alumnos, attendance, toggleAttendance, s
               </div>
               <div>
                 <div className="font-medium">{a.Apellido}, {a.Nombres}</div>
-                <div className="text-xs opacity-70">DNI: {a.DNI}</div>
+                <div className="text-xs opacity-70">DNI: {a.DNIAlumno}</div>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <label className="text-sm">{attendance[a.DNI] ? 'Presente ✅' : 'Ausente ❌'}</label>
+              <label className="text-sm">{attendance[a.DNIAlumno] ? 'Presente ✅' : 'Ausente ❌'}</label>
               <input 
                 type="checkbox" 
                 className="toggle toggle-success"
-                checked={!!attendance[a.DNI]} 
-                onChange={() => toggleAttendance(a.DNI)} 
+                checked={!!attendance[a.DNIAlumno]} 
+                onChange={() => toggleAttendance(a.DNIAlumno)} 
               />
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function AttendanceTab({ alumnos, attendance, toggleAttendance, s
         <button 
           onClick={() => { 
             const init = {}; 
-            alumnos.forEach(a => init[a.DNI] = false); 
+            alumnos.forEach(a => init[a.DNIAlumno] = false); 
             setAttendance(init); 
           }} 
           className="btn btn-outline"

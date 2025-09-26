@@ -1,5 +1,5 @@
 const fs = require('fs');
-const db = require('../db.js'); // si db.js también usa require
+const db = require('../db.js'); 
 
 // --- 1. Crear tablas ---
 const schema = fs.readFileSync('./db/scripts/schema_update.sql', 'utf8');
@@ -347,7 +347,7 @@ const cursoMateria = [
   ["5D-PRI", 1, "30111222", 5], // Matemática
   ["5D-PRI", 2, "29888777", 4], // Lengua
   ["5D-PRI", 7, "31222333", 3], // Educación Física
-  ["5D-PRI", 8, "28777111", 2]  // Arte
+  ["5D-PRI", 8, "28777111", 2]  
 ];
 
 const insertCursoMateria = db.prepare(`
@@ -395,7 +395,7 @@ const horarioMateria = [
 
 const insertHorario = db.prepare(`
   INSERT INTO HorarioMateria 
-    (IdCurso, IdMateria, DiaSemana, HoraInicio, HoraFin, IdAula) 
+    (IdCurso, IdMateria, DiaSemana, HoraInicio, HoraFin, NumAula) 
     VALUES (?, ?, ?, ?, ?, ?)
 `);
 
