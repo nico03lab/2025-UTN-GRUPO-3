@@ -13,7 +13,7 @@ export const HomePage = () => {
       <header className="bg-base-100">
         <div className="navbar bg-base-150 p-6 rounded-lg shadow-md mb-6">
         <div className="flex-1">
-            <a className="font-bold text-blue-400 ">HOMEPAGE</a>
+            <a className="font-bold text-blue-400 ">Inicio</a>
         </div>
         <label className="flex cursor-pointer gap-2">
             <svg
