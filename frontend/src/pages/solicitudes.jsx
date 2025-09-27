@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import SolicitudDashboard from "../components/SolicitudDashboard.jsx";
 
 const solicitudes = [
@@ -12,7 +13,11 @@ export default function Solicitudes() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Solicitudes de Inscripción</h1>
-
+      <Link to="/">
+        <button className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-70btn bg-blue-500 text-white hover:bg-blue-600 mb-4">
+          Volver al Inicio
+        </button>
+      </Link>
       <div className="grid grid-cols-3 gap-6">
         {/* Lista de solicitudes */}
         <div className="col-span-1 space-y-2">
