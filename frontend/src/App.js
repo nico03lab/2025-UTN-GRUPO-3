@@ -13,7 +13,6 @@ function App() {
       <Route path="/docente" element={<TeacherDashboard/>}></Route>
       <Route path='/solicitudes' element={<Solicitudes/>}></Route>
       <Route path="/estudiantes" element={<EstudiantesPage/>}></Route>
-
     </Routes>
   );
 }

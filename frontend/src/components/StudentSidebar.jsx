@@ -1,4 +1,4 @@
-import { CalendarClock, UserRoundCheck ,CircleUser, BookCheck } from 'lucide-react'
+import { CalendarClock, UserRoundCheck ,CircleUser, BookCheck, Calendar, MailCheckIcon } from 'lucide-react'
 
 export const StudentSidebar = ({ estudiantes, selectedEstudiante, setSelectedEstudiante, tab, setTab }) => {
   return (
@@ -53,6 +53,27 @@ export const StudentSidebar = ({ estudiantes, selectedEstudiante, setSelectedEst
           <BookCheck className="h-5 w-5" />
           Ver Notas
         </button>
+
+        <button 
+          onClick={() => setTab('calendar')} 
+          className={`flex items-center gap-3 w-full p-2 rounded-box ${tab === 'calendar' ? 
+            'bg-gray-500 text-info-content' : 
+            'hover:bg-base-200'}`}
+        >
+          <Calendar className="h-5 w-5" />
+          Calendario de Eventos
+        </button>
+
+        <button 
+          onClick={() => setTab('mailbox')} 
+          className={`flex items-center gap-3 w-full p-2 rounded-box ${tab === 'mailbox' ? 
+            'bg-success text-success-content' : 
+            'hover:bg-base-200'}`}
+        >
+          <MailCheckIcon className="h-5 w-5" />
+          Mensajes
+        </button>
+
       </div>
     </div>
   )
