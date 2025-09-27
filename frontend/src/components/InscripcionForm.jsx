@@ -105,7 +105,7 @@ export const InscripcionForm = () => {
               </div>
             </div>
           </div>
-        )};
+        )}
 
         <NavigationFooter
           currentStep={currentStep}
