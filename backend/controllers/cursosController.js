@@ -13,5 +13,13 @@ const getCursosPorProfe = (req, res) => {
   }
 };
 
+const getCursoByNivelYTurno = (nivel, grado, turno, especialidad)=>{
+  const esp = db.prepare('SELECT * FROM Especialidades WHERE Nombre=?').get(especialidad);
+  if (!esp) {
+    throw new Error(`Especialidad no encontrada: ${especialidad}`);
+  }
+  return db.prepare('SELECT * FROM Cursos WHERE Nivel = ? AND Grado= ? AND Turno=? AND IdEspecialidad=?').get(nivel,grado,turno, esp.IdEspecialidad);
+}
 
-module.exports = { getCursosPorProfe };
+
+module.exports = { getCursosPorProfe , getCursoByNivelYTurno};

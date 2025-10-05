@@ -15,6 +15,7 @@ app.use(express.json());
 //Importar ruta principal
 app.use('/api', apiRouter);
 
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
