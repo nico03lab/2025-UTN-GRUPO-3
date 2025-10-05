@@ -2,10 +2,15 @@ import { InputField } from "./InputField";
 
 // Componente Paso 1: Datos del Estudiante
 export const DatosEstudiante = ({ formData, handleInputChange }) => {
-  const generoOptions = [
-    { value: 'masculino', label: 'Masculino' },
-    { value: 'femenino', label: 'Femenino' },
-    { value: 'otro', label: 'Otro' }
+  const localidadesOptions = [
+    { value: 'La Plata', label: 'La Plata' },
+    { value: 'Berrisso', label: 'Berisso' },
+    { value: 'Ensenada', label: 'Ensenada' },
+    { value: 'Gonnet', label: 'Gonnet' },
+    { value: 'Ringuelet', label: 'Ringuelet' }
+  ];
+  const provinciaOptions = [
+    { value: 'Buenos Aires', label: 'Buenos Aires' }
   ];
 
   return (
@@ -48,31 +53,47 @@ export const DatosEstudiante = ({ formData, handleInputChange }) => {
         />
         
         <InputField
-          label="Género"
-          name="genero"
-          value={formData.genero}
-          onChange={handleInputChange}
-          placeholder="Seleccionar género"
-          options={generoOptions}
-          required
-        />
-        
-        <InputField
           label="Teléfono"
           name="telefono"
           type="tel"
           value={formData.telefono}
           onChange={handleInputChange}
-          placeholder="11-1234-5678"
+          placeholder="1112345678"
         />
-        
-        <div className="md:col-span-2">
+      </div>  
+        <h3 className="font-medium text-base-content py-4">Direccion</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputField
-            label="Dirección"
-            name="direccion"
-            value={formData.direccion}
+            label="Calle"
+            name="calle"
+            value={formData.calle}
             onChange={handleInputChange}
-            placeholder="Calle, número, ciudad, provincia"
+            placeholder="Calle"
+            required
+          />
+          <InputField
+            label="Numero"
+            name="numero"
+            value={formData.numero}
+            onChange={handleInputChange}
+            placeholder="numero"
+          />
+          <InputField
+            label="Localidad"
+            name="localidad"
+            value={formData.localidad}
+            onChange={handleInputChange}
+            placeholder="Seleccionar localidad"
+            options={localidadesOptions}
+            required
+          />
+          <InputField
+            label="Provincia"
+            name="provincia"
+            value={formData.provincia}
+            onChange={handleInputChange}
+            placeholder="Seleccionar provincia"
+            options={provinciaOptions}
             required
           />
         </div>
@@ -87,7 +108,6 @@ export const DatosEstudiante = ({ formData, handleInputChange }) => {
             placeholder="estudiante@email.com"
           />
         </div>
-      </div>
     </div>
   );
 };

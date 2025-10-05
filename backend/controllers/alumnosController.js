@@ -26,10 +26,10 @@ const getAlumnosPorCurso = (req, res) => {
 };
 
 const getAlumnoByDNI = (dni) => {
-  return db.prepare('SELECT * FROM Alumnos WHERE DNI = ?').get(dni);
+  return db.prepare('SELECT * FROM Alumnos WHERE DNIAlumno = ?').get(dni);
 };
 
-//Esto cuando se confirma la inscripcion, es interno
+//Esto cuando se realiza la inscripcion, falta confirmarlo, es interno
 const createAlumno = (datosAlumno) => {
   let idLocalidad;
   const localidadExistente = getLocalidadByNombre(datosAlumno.localidad, datosAlumno.provincia );
@@ -38,10 +38,10 @@ const createAlumno = (datosAlumno) => {
   }else {
     idLocalidad = createLocalidad(datosAlumno.localidad, datosAlumno.provincia);
   }
-  const fechaAlta = new Date().toISOString().replace("T", " ").split(".")[0]; // YYYY-MM-DD HH:mm:ss
-  const estado = "Confirmado";
-  const stmt = db.prepare('INSERT INTO Alumnos (DNI, Apellido, Nombres, Calle, Numero, IdLocalidad, Telefono, Email, Estado, FechaAlta) VALUES (?,?,?,?,?,?,?,?,?,?)');
-  stmt.run(datosAlumno.dni, datosAlumno.apellido, datosAlumno.nombre, datosAlumno.calle, datosAlumno.numero, idLocalidad, datosAlumno.telefono, datosAlumno.email, estado, fechaAlta);
+  const fechaAlta = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const estado = "Inscripcion en tramite";
+  const stmt = db.prepare('INSERT INTO Alumnos (DNIAlumno, Apellido, Nombres, Calle, Numero, IdLocalidad, Telefono, Email, Estado, FechaNacimiento, FechaAlta) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
+  stmt.run(datosAlumno.dni, datosAlumno.apellido, datosAlumno.nombre, datosAlumno.calle, datosAlumno.numero, idLocalidad, datosAlumno.telefono, datosAlumno.email, estado, datosAlumno.fechaNacimiento, fechaAlta);
 }
 
 

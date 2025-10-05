@@ -1,8 +1,7 @@
-import { FileUpload} from "./FileUpload";
+// components/DocumentacionRequerida.jsx
+import { FileUpload } from './FileUpload';
 
-
-// Componente Paso 4: Documentación
-export const DocumentacionRequerida = ({ formData, handleInputChange }) => {
+export const DocumentacionRequerida = ({ formData, handleInputChange, handleFileChange }) => {
   const documentos = [
     { name: 'certificadoNacimiento', label: 'Certificado de Nacimiento' },
     { name: 'certificadoEstudios', label: 'Certificado de Estudios' },
@@ -33,10 +32,22 @@ export const DocumentacionRequerida = ({ formData, handleInputChange }) => {
                 />
                 <span className="label-text">{doc.label}</span>
               </label>
+              
+              {/* Mostrar FileUpload solo si el checkbox está marcado */}
+              {formData[doc.name] && (
+                <div className="mt-2 ml-8">
+                  <FileUpload
+                    name={doc.name}
+                    label={doc.label}
+                    onChange={handleFileChange}
+                    required={formData[doc.name]}
+                    currentFile={formData.archivos[doc.name]}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
-        <FileUpload></FileUpload>
       </div>
     </div>
   );

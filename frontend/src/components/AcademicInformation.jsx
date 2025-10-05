@@ -3,9 +3,8 @@ import { InputField } from "./InputField";
  // Componente Paso 2: Información Académica
 export const InformacionAcademica = ({ formData, handleInputChange }) => {
   const nivelOptions = [
-    { value: 'inicial', label: 'Inicial' },
-    { value: 'primaria', label: 'Primaria' },
-    { value: 'secundaria', label: 'Secundaria' }
+    { value: 'Primario', label: 'Primario' },
+    { value: 'Secundario', label: 'Secundario' }
   ];
   const turnoOptions = [
     { value: 'Mañana', label: 'Mañana' },
@@ -15,35 +14,44 @@ export const InformacionAcademica = ({ formData, handleInputChange }) => {
   // Función para obtener opciones de curso dinámicas basado en nivel
   const getCursoOptions = (nivel) => {
     switch (nivel) {
-      case 'inicial':
+      case 'Primario':
         return [
-          { value: 'sala3', label: 'Sala de 3' },
-          { value: 'sala4', label: 'Sala de 4' },
-          { value: 'sala5', label: 'Sala de 5' }
+          { value: '1', label: '1° Grado' },
+          { value: '2', label: '2° Grado' },
+          { value: '3', label: '3° Grado' },
+          { value: '4', label: '4° Grado' },
+          { value: '5', label: '5° Grado' },
+          { value: '6', label: '6° Grado' },
+          { value: '7', label: '7° Grado' } // Agregado para primaria
         ];
-      case 'primaria':
+        case 'Secundario':
         return [
-          { value: '1ro', label: '1° Grado' },
-          { value: '2do', label: '2° Grado' },
-          { value: '3ro', label: '3° Grado' },
-          { value: '4to', label: '4° Grado' },
-          { value: '5to', label: '5° Grado' },
-          { value: '6to', label: '6° Grado' },
-          { value: '7mo', label: '7° Grado' } // Agregado para primaria
-        ];
-        case 'secundaria':
-        return [
-          { value: '1ro', label: '1° Año' },
-          { value: '2do', label: '2° Año' },
-          { value: '3ro', label: '3° Año' },
-          { value: '4to', label: '4° Año' },
-          { value: '5to', label: '5° Año' } // Hasta 5to para secundaria
+          { value: '1', label: '1° Año' },
+          { value: '2', label: '2° Año' },
+          { value: '3', label: '3° Año' },
+          { value: '4', label: '4° Año' },
+          { value: '5', label: '5° Año' } // Hasta 5to para secundaria
         ];
       default:
         return []; // Opciones vacías si no hay nivel seleccionado
     }
   };
-   const cursoOptions = getCursoOptions(formData.nivelEducativo); // Computa dinámicamente
+  const cursoOptions = getCursoOptions(formData.nivelEducativo); // Computa dinámicamente
+
+  // Función para obtener opciones de curso dinámicas basado en nivel
+  const getEspecialidadOptions = (nivel) => {
+    if(nivel === "Secundario") {
+        return [
+          { value: 'Cs. Exactas', label: 'Cs. Exactas' }, 
+          { value: 'Cs. Naturales', label: 'Cs. Naturales' },
+          { value: 'Cs.Sociales', label: 'Cs.Sociales' }// Hasta 5to para secundaria
+        ];
+    }else{
+        return []; // Opciones vacías si no hay nivel seleccionado
+    }
+  };
+  const especialidadOptions = getEspecialidadOptions(formData.nivelEducativo); // Computa dinámicamente
+
 
 
   return (
@@ -80,6 +88,15 @@ export const InformacionAcademica = ({ formData, handleInputChange }) => {
           placeholder="Seleccionar turno"
           options={turnoOptions}
           required
+        />
+
+        <InputField
+          label="Especialidad Solicitado (Secundaria)"
+          name="especialidadSolicitado"
+          value={formData.especialidadSolicitado}
+          onChange={handleInputChange}
+          placeholder="Seleccionar especialidad"
+          options={especialidadOptions}
         />
       </div>
       
