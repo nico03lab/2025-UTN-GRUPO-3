@@ -164,4 +164,69 @@ const getDocumentosByInscripcion = (req, res) => {
   }
 };
 
-module.exports = {createInscripcion, getDocumentosByInscripcion};
+
+//Gestion de inscripciones (Dashboard Directivo)
+
+// Obtener todas las solicitudes
+const getInscripciones = (req, res) => {
+  try {
+    const inscripciones = db
+      .prepare(`
+        SELECT 
+          i.*, 
+          a.Nombres, 
+          a.Apellido
+        FROM Inscripciones i
+        LEFT JOIN Alumnos a ON i.DNIAlumno = a.DNIAlumno
+        ORDER BY i.FechaInscripcion DESC
+      `)
+      .all();
+    res.json(inscripciones);
+  } catch (err) {
+    console.error("❌ Error al obtener inscripciones:", err);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+
+// Obtener una solicitud específica
+const getInscripcion = (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const row = db
+      .prepare(`
+        SELECT 
+          i.*, 
+          a.Nombre AS Nombre,
+          a.Apellido AS Apellido
+        FROM Inscripciones i
+        LEFT JOIN Alumnos a ON i.DNIAlumno = a.DNIAlumno
+        WHERE i.IdInscripcion = ?
+      `)
+      .get(id);
+
+    if (!row) {
+      return res.status(404).json({ error: "Inscripción no encontrada" });
+    }
+
+    // Si tu tabla Inscripciones tiene un campo JSON con documentos:
+    row.docs = row.Documentos ? JSON.parse(row.Documentos) : [];
+
+    return res.status(200).json(row);
+  } catch (error) {
+    console.error("❌ Error al obtener inscripción:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+
+// Actualizar estado
+const updateState = (req, res) =>  {
+  const { id } = req.params;
+  const { estado } = req.body;
+  db.prepare("UPDATE Inscripciones SET Estado = ? WHERE IdInscripcion = ?").run(estado, id);
+  res.json({ message: "Estado actualizado correctamente" });
+};
+
+module.exports = {createInscripcion, getDocumentosByInscripcion, getInscripcion, getInscripciones, updateState};
