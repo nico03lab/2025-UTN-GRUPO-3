@@ -1,72 +1,113 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
-import SolicitudDashboard from "../components/SolicitudDashboard.jsx";
-
-const solicitudes = [
-  { id: 1, codigo: "Solicitud #0001", nombre: "Juan Pérez", fecha: "2025-09-25", estado: "Pendiente", dni: "40.123.456", nacimiento: "2005-03-10", docs: ["DNI.pdf", "Boletín.pdf"], email: "juanperez05@gmail.com" },
-  { id: 2, codigo: "Solicitud #0002", nombre: "María Gómez", fecha: "2025-09-20", estado: "Aprobada", dni: "39.111.222", nacimiento: "2004-07-22", docs: ["DNI.pdf"] },
-  { id: 3, codigo: "Solicitud #0003", nombre: "Lorena Garcia", fecha: "2025-09-27", estado: "Rechazada", dni: "50.076.123", nacimiento: "2006-10-11", docs: ["DNI.pdf"] },
-];
+import SolicitudDashboard from "../components/SolicitudDashboard";
 
 export default function Solicitudes() {
+  const [inscripciones, setInscripciones] = useState([]);
   const [seleccionada, setSeleccionada] = useState(null);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Filtrado por código, nombre o DNI
-  const filteredSolicitudes = solicitudes.filter((s) =>
-    s.codigo.toLowerCase().includes(search.toLowerCase()) ||
-    s.nombre.toLowerCase().includes(search.toLowerCase()) ||
-    s.dni.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    axios
+      .get("http://localhost:3002/api/inscripcion")
+      .then((res) => {
+        setInscripciones(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("❌ Error al cargar inscripciones:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  // 🔍 Filtrado dinámico
+  const filtered = inscripciones.filter((i) => {
+    const texto = `${i.DNIAlumno} ${i.Nivel} ${i.Grado} ${i.Turno}`.toLowerCase();
+    return texto.includes(search.toLowerCase());
+  });
+
+  const getColor = (estado) => {
+    switch (estado.toLowerCase()) {
+      case "aprobada":
+        return "bg-green-100 border-green-400 text-green-800";
+      case "rechazada":
+        return "bg-red-100 border-red-400 text-red-800";
+      default:
+        return "bg-yellow-100 border-yellow-400 text-yellow-800";
+    }
+  };
 
   return (
     <div className="p-6">
-      <Link to="/">
-        <button className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          Volver al Inicio
-        </button>
-      </Link>
-      
-      <h1 className="text-2xl font-bold mb-4">Solicitudes de Inscripción</h1>
 
-      {/* Buscador */}
+      <h1 className="text-2xl font-bold mb-4">📋 Inscripciones</h1>
+
+      {/* 🔎 Buscador */}
       <input
         type="text"
-        placeholder="Buscar solicitud..."
+        placeholder="Buscar por DNI, nivel o turno..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="border rounded px-3 py-2 mb-6 w-full"
+        className="input input-bordered w-full mb-6"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Listado filtrado */}
-        <div className="md:col-span-1">
-          <h2 className="text-xl font-bold mb-2">Resultados</h2>
-          {filteredSolicitudes.map((s) => (
-            <div
-              key={s.id}
-              className={`cursor-pointer p-4 mb-3 shadow rounded border-l-4 ${
-                s.estado === "Pendiente"
-                  ? "bg-yellow-50 border-yellow-400"
-                  : s.estado === "Aprobada"
-                  ? "bg-green-50 border-green-400"
-                  : "bg-red-50 border-red-400"
-              }`}
-              onClick={() => setSeleccionada(s)}
-            >
-              <h3 className="font-semibold">{s.codigo}</h3>
-              <p>{s.nombre}</p>
-              <p>DNI: {s.dni}</p>
-              <span className="text-sm">{s.estado}</span>
-            </div>
-          ))}
-        </div>
+      {loading ? (
+        <div className="text-center py-6 opacity-70">Cargando inscripciones...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 📜 Listado */}
+          <div className="md:col-span-1">
+            <h2 className="text-xl font-bold mb-3">
+              Resultados ({filtered.length})
+            </h2>
 
-        {/* Dashboard de la solicitud seleccionada */}
-        <div className="md:col-span-2">
-          <SolicitudDashboard solicitud={seleccionada} />
+            {filtered.length === 0 ? (
+              <p className="text-sm opacity-70">
+                No se encontraron inscripciones.
+              </p>
+            ) : (
+              filtered.map((i) => (
+                <div
+                  key={i.IdInscripcion}
+                  onClick={() => setSeleccionada(i)}
+                  className={`cursor-pointer p-4 mb-3 rounded-box border-l-4 transition-all shadow hover:shadow-md ${getColor(i.Estado)} ${
+                    seleccionada?.IdInscripcion === i.IdInscripcion
+                      ? "ring ring-primary ring-offset-1"
+                      : ""
+                  }`}
+                >
+                  <h3 className="font-semibold text-sm">
+                    DNI: {i.DNIAlumno}
+                  </h3>
+                  <h3 className="font-semibold text-sm">
+                    Apellido y nombres: {i.Apellido} {i.Nombres}
+                  </h3>
+                  <p className="text-sm opacity-80">
+                    {i.Nivel} — {i.Grado}° ({i.Turno})
+                  </p>
+                  <p className="text-xs opacity-70">
+                    Fecha: {new Date(i.FechaInscripcion).toLocaleDateString()}
+                  </p>
+                  <span className="text-xs font-medium">{i.Estado}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* 📊 Panel de detalle */}
+          <div className="md:col-span-2">
+            {seleccionada ? (
+              <SolicitudDashboard solicitud={seleccionada} />
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-500 italic opacity-60">
+                Selecciona una inscripción para ver más detalles.
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

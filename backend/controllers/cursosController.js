@@ -21,5 +21,27 @@ const getCursoByNivelYTurno = (nivel, grado, turno, especialidad)=>{
   return db.prepare('SELECT * FROM Cursos WHERE Nivel = ? AND Grado= ? AND Turno=? AND IdEspecialidad=?').get(nivel,grado,turno, esp.IdEspecialidad);
 }
 
+const getCursos = (req, res) => {
+  try {
+    const cursos = db.prepare(`
+      SELECT 
+        c.IdCurso,
+        c.Nivel,
+        c.Grado,
+        c.Letra,
+        c.Turno,
+        c.CantMaxAlumnos,
+        e.Nombre AS Especialidad
+      FROM Cursos c
+      LEFT JOIN Especialidades e ON c.IdEspecialidad = e.IdEspecialidad
+      ORDER BY c.Nivel, c.Grado, c.Turno, c.Letra
+    `).all();
 
-module.exports = { getCursosPorProfe , getCursoByNivelYTurno};
+    res.json(cursos);
+  } catch (err) {
+    console.error("❌ Error en getCursos:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { getCursosPorProfe , getCursoByNivelYTurno, getCursos};

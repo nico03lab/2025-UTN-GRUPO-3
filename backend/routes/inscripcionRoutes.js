@@ -1,5 +1,5 @@
 const express = require('express');
-const { createInscripcion } = require('../controllers/inscripcionesController');
+const { createInscripcion, getInscripciones, getInscripcion, updateState } = require('../controllers/inscripcionesController');
 const upload = require('../config/multerConfig');
 
 const router = express.Router();
@@ -7,6 +7,9 @@ const router = express.Router();
 //crear nueva inscripcion 
 //router.post('/', createInscripcion);
 
+router.get('/', getInscripciones);
+router.get('/:id', getInscripcion)
+router.put('/:id/estado', updateState)
 
 // Crear inscripción con documentos
 router.post('/', upload.fields([

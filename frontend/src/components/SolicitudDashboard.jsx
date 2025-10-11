@@ -1,4 +1,28 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 export default function SolicitudDashboard({ solicitud }) {
+  const [documentos, setDocumentos] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // 🧠 Cargar documentos cuando cambia la solicitud seleccionada
+  useEffect(() => {
+    if (!solicitud?.IdInscripcion) return;
+
+    setLoading(true);
+    axios
+      .get(`http://localhost:3002/api/documentos/${solicitud.IdInscripcion}`)
+      .then((res) => {
+        setDocumentos(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("❌ Error al obtener documentos:", err);
+        setDocumentos([]);
+        setLoading(false);
+      });
+  }, [solicitud]);
+
   if (!solicitud) {
     return (
       <div className="p-6 border rounded-lg shadow text-gray-500 bg-gray-50">
@@ -7,26 +31,38 @@ export default function SolicitudDashboard({ solicitud }) {
     );
   }
 
+  const estado = solicitud.Estado || solicitud.estado || "pendiente";
+
   return (
     <div
       className={`p-6 border-l-4 rounded-lg shadow bg-white ${
-        solicitud.estado === "Pendiente"
+        estado === "pendiente"
           ? "border-yellow-400"
-          : solicitud.estado === "Aprobada"
+          : estado === "aprobada"
           ? "border-green-400"
           : "border-red-400"
       }`}
     >
       <h2 className="text-xl font-bold mb-4">Detalle de la Solicitud</h2>
-      <h3 className="mb-2 text-gray-600">Los incisos con * son obligatorios</h3>
 
+      {/* 🧩 Información general */}
       <div className="grid grid-cols-2 gap-4">
-        
         <div>
-          <p><strong>*Nombre:</strong> {solicitud.nombre}</p>
-          <p><strong>*DNI:</strong> {solicitud.dni}</p>
-          <p><strong>*Email:</strong> {solicitud.email || "No informado"}</p>
-          <p><strong>*Fecha de nacimiento:</strong> {solicitud.nacimiento}</p>
+          <p>
+            <strong>*Apellido y Nombres:</strong> {solicitud.Apellido} {solicitud.Nombres}
+          </p>
+          <p>
+            <strong>*DNI:</strong> {solicitud.DNIAlumno}
+          </p>
+          <p>
+            <strong>*Nivel:</strong> {solicitud.Nivel}
+          </p>
+          <p>
+            <strong>*Grado:</strong> {solicitud.Grado}°
+          </p>
+          <p>
+            <strong>*Turno:</strong> {solicitud.Turno}
+          </p>
         </div>
 
         <div>
@@ -34,33 +70,53 @@ export default function SolicitudDashboard({ solicitud }) {
             <strong>Estado:</strong>
             <span
               className={`ml-2 px-2 py-1 rounded text-sm ${
-                solicitud.estado === "Pendiente"
+                estado === "pendiente"
                   ? "bg-yellow-100 text-yellow-800"
-                  : solicitud.estado === "Aprobada"
+                  : estado === "aprobada"
                   ? "bg-green-100 text-green-800"
                   : "bg-red-100 text-red-800"
               }`}
             >
-              {solicitud.estado}
+              {estado}
             </span>
           </p>
           <p>
-            <strong>Fecha de solicitud:</strong> {solicitud.fecha}
+            <strong>Fecha de inscripción:</strong>{" "}
+            {new Date(solicitud.FechaInscripcion).toLocaleDateString()}
           </p>
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold mt-6 mb-2">Documentos</h3>
-      <ul className="list-disc ml-5">
-        {solicitud.docs.map((doc, index) => (
-          <li key={index} className="text-blue-500 underline cursor-pointer">
-            {doc}
-          </li>
-        ))}
-      </ul>
+      {/* 📂 Documentos asociados */}
+      <h3 className="text-lg font-semibold mt-6 mb-2">📎 Documentos</h3>
 
-      {/* Mostrar botones solo si está pendiente */}
-      {solicitud.estado === "Pendiente" && (
+      {loading ? (
+        <p className="text-sm opacity-70">Cargando documentos...</p>
+      ) : documentos.length > 0 ? (
+        <ul className="list-disc ml-6 text-sm space-y-1">
+          {documentos.map((doc) => (
+            <li key={doc.IdDocumento}>
+              <a
+                href={`http://localhost:3002/${doc.RutaArchivo}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {doc.Descripcion || doc.NombreArchivo}
+              </a>{" "}
+              <span className="opacity-60 text-xs">
+                ({doc.TipoMime.split("/")[1].toUpperCase()} •{" "}
+                {new Date(doc.FechaSubida).toLocaleDateString()})
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm opacity-70">No hay documentos asociados.</p>
+      )}
+
+      {/* 🟢 Botones de acción */}
+      {estado.toLowerCase() === "pendiente" && (
         <div className="mt-6 flex gap-3">
           <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
             Aprobar
