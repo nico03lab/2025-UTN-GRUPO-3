@@ -66,7 +66,7 @@ CREATE TABLE DatosMedicos (
     Alergias TEXT NULL,
     EnfermedadesPrevias TEXT NULL,
     Observaciones TEXT NULL,
-    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNI)
+    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNIAlumno)
 );
 
 -- Tutores
@@ -80,7 +80,7 @@ CREATE TABLE Tutores (
     TelefonoCel TEXT NULL,
     TelefonoLinea TEXT NULL,
     Email TEXT NULL,
-    IdUsuario TEXT NOT NULL,
+    IdUsuario TEXT NULL,
     FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario),
     FOREIGN KEY (IdLocalidad) REFERENCES Localidades(IdLocalidad)
 );
@@ -183,7 +183,7 @@ CREATE TABLE DocumentacionInscripciones (
     Archivo BLOB NULL,
     RutaArchivo TEXT NULL,
     FechaSubida DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (IdInscripcion) REFERENCES Solicitudes(IdSolicitud)
+    FOREIGN KEY (IdInscripcion) REFERENCES Inscripciones(IdInscripcion)
 );
 
 -- Asistencias
@@ -212,7 +212,7 @@ CREATE TABLE Boletines (
     Promedio REAL NULL,
     FechaGeneracion DATETIME DEFAULT CURRENT_TIMESTAMP,
     Observaciones TEXT NULL,
-    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNI)
+    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNIAlumno)
 );
 
 CREATE TABLE BoletinDetalle (
