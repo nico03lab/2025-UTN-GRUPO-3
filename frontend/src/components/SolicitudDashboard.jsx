@@ -2,26 +2,97 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function SolicitudDashboard({ solicitud }) {
+  console.log("🧾 Solicitud recibida:", solicitud);
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [mostrarAsignacion, setMostrarAsignacion] = useState(false); // 👈 nuevo estado
+  const [cursos, setCursos] = useState([]);
+  const [cursoSeleccionado, setCursoSeleccionado] = useState("");
 
-  // 🧠 Cargar documentos cuando cambia la solicitud seleccionada
+  // 🧠 Cargar documentos
   useEffect(() => {
     if (!solicitud?.IdInscripcion) return;
 
-    setLoading(true);
-    axios
-      .get(`http://localhost:3002/api/documentos/${solicitud.IdInscripcion}`)
-      .then((res) => {
+    const fetchDocumentos = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `http://localhost:3002/api/documentos/${solicitud.IdInscripcion}`
+        );
         setDocumentos(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("❌ Error al obtener documentos:", err);
         setDocumentos([]);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchDocumentos();
   }, [solicitud]);
+
+  // 🧩 Cargar lista de cursos disponibles
+  useEffect(() => {
+    if (mostrarAsignacion) {
+      axios
+        .get("http://localhost:3002/api/cursos")
+        .then((res) => setCursos(res.data))
+        .catch((err) => {
+          console.error("❌ Error al obtener cursos:", err);
+          setCursos([]);
+        });
+    }
+  }, [mostrarAsignacion]);
+
+  const estado = solicitud.Estado;
+
+  const handleUpdateEstado = async (nuevoEstado) => {
+    try {
+      const confirm = window.confirm(
+        `¿Seguro que deseas marcar esta solicitud como "${nuevoEstado}"?`
+      );
+      if (!confirm) return;
+
+      await axios.put(
+        `http://localhost:3002/api/inscripcion/${solicitud.IdInscripcion}/estado`,
+        { estado: nuevoEstado }
+      );
+
+      alert(`✅ Estado actualizado a "${nuevoEstado}"`);
+
+      solicitud.Estado = nuevoEstado;
+
+      // 🧠 Si fue aprobada, abrir modal de asignación
+      if (nuevoEstado === "aprobada") {
+        setMostrarAsignacion(true);
+      }
+    } catch (err) {
+      console.error("❌ Error al actualizar estado:", err);
+      alert("Error al actualizar el estado. Ver consola.");
+    }
+  };
+
+  const handleAsignarCurso = async () => {
+    if (!cursoSeleccionado) {
+      alert("Por favor seleccioná un curso.");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `http://localhost:3002/api/alumnos/${solicitud.DNIAlumno}/curso`,
+        {
+          idCurso: cursoSeleccionado
+        }
+      );
+
+      alert("✅ Alumno asignado correctamente al curso y activado.");
+      setMostrarAsignacion(false);
+    } catch (err) {
+      console.error("❌ Error al asignar curso:", err);
+      alert("Error al asignar curso. Ver consola.");
+    }
+  };
 
   if (!solicitud) {
     return (
@@ -30,8 +101,6 @@ export default function SolicitudDashboard({ solicitud }) {
       </div>
     );
   }
-
-  const estado = solicitud.Estado || solicitud.estado || "pendiente";
 
   return (
     <div
@@ -49,7 +118,8 @@ export default function SolicitudDashboard({ solicitud }) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <p>
-            <strong>*Apellido y Nombres:</strong> {solicitud.Apellido} {solicitud.Nombres}
+            <strong>*Apellido y Nombres:</strong> {solicitud.Apellido}{" "}
+            {solicitud.Nombres}
           </p>
           <p>
             <strong>*DNI:</strong> {solicitud.DNIAlumno}
@@ -62,6 +132,9 @@ export default function SolicitudDashboard({ solicitud }) {
           </p>
           <p>
             <strong>*Turno:</strong> {solicitud.Turno}
+          </p>
+          <p>
+            <strong>*Especialidad:</strong> {solicitud.NombreEspecialidad}
           </p>
         </div>
 
@@ -87,7 +160,7 @@ export default function SolicitudDashboard({ solicitud }) {
         </div>
       </div>
 
-      {/* 📂 Documentos asociados */}
+      {/* 📂 Documentos */}
       <h3 className="text-lg font-semibold mt-6 mb-2">📎 Documentos</h3>
 
       {loading ? (
@@ -105,7 +178,7 @@ export default function SolicitudDashboard({ solicitud }) {
                 {doc.Descripcion || doc.NombreArchivo}
               </a>{" "}
               <span className="opacity-60 text-xs">
-                ({doc.TipoMime.split("/")[1].toUpperCase()} •{" "}
+                ({doc.TipoMime?.split("/")[1]?.toUpperCase() || "?"} •{" "}
                 {new Date(doc.FechaSubida).toLocaleDateString()})
               </span>
             </li>
@@ -118,12 +191,60 @@ export default function SolicitudDashboard({ solicitud }) {
       {/* 🟢 Botones de acción */}
       {estado.toLowerCase() === "pendiente" && (
         <div className="mt-6 flex gap-3">
-          <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-            Aprobar
+          <button
+            className="btn btn-success"
+            onClick={() => handleUpdateEstado("aprobada")}
+          >
+            ✅ Aprobar
           </button>
-          <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-            Rechazar
+          <button
+            className="btn btn-error"
+            onClick={() => handleUpdateEstado("rechazada")}
+          >
+            ❌ Rechazar
           </button>
+        </div>
+      )}
+
+      {/* 🧩 Modal de Asignación */}
+      {mostrarAsignacion && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-[400px]">
+            <h3 className="text-lg font-semibold mb-4">
+              Asignar curso al alumno
+            </h3>
+
+            {cursos.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                No hay cursos disponibles o aún se están cargando.
+              </p>
+            ) : (
+              <select
+                className="select select-bordered w-full mb-4"
+                value={cursoSeleccionado}
+                onChange={(e) => setCursoSeleccionado(e.target.value)}
+              >
+                <option value="">Seleccionar curso...</option>
+                {cursos.map((c) => (
+                  <option key={c.IdCurso} value={c.IdCurso}>
+                    {c.Grado}° {c.Letra} - {c.Nivel} - ({c.Turno})
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="btn btn-outline"
+                onClick={() => setMostrarAsignacion(false)}
+              >
+                Cancelar
+              </button>
+              <button className="btn btn-primary" onClick={handleAsignarCurso}>
+                Asignar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -44,5 +44,38 @@ const createAlumno = (datosAlumno) => {
   stmt.run(datosAlumno.dni, datosAlumno.apellido, datosAlumno.nombre, datosAlumno.calle, datosAlumno.numero, idLocalidad, datosAlumno.telefono, datosAlumno.email, estado, datosAlumno.fechaNacimiento, fechaAlta);
 }
 
+const updateStateAlumno = (req, res) => {
+  const { dni } = req.params;
+  const { estado } = req.body;
 
-module.exports = { getAlumnos, getAlumnosPorCurso , getAlumnoByDNI, createAlumno};
+  try {
+    db.prepare("UPDATE Alumnos SET Estado = ? WHERE DNIAlumno = ?").run(estado, dni);
+    res.json({ message: `✅ Estado actualizado a "${estado}"` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const updateCursoAlumno = (req, res) => {
+  const { dni } = req.params;
+  const { idCurso } = req.body;
+
+  console.log("📥 PUT /api/alumnos/:dni/curso");
+  console.log("dni:", dni);
+  console.log("idCurso:", idCurso);
+
+  try {
+    const result = db
+      .prepare("UPDATE Alumnos SET IdCurso = ?, Estado = ? WHERE DNIAlumno = ?")
+      .run(idCurso, "activo", dni);
+
+    console.log("✅ Resultado DB:", result);
+    res.json({ message: `Alumno ${dni} asignado al curso ${idCurso}` });
+  } catch (err) {
+    console.error("❌ Error SQL:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+module.exports = { getAlumnos, getAlumnosPorCurso , getAlumnoByDNI, createAlumno, updateStateAlumno, updateCursoAlumno};

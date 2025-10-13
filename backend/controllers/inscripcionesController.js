@@ -174,10 +174,12 @@ const getInscripciones = (req, res) => {
       .prepare(`
         SELECT 
           i.*, 
-          a.Nombres, 
-          a.Apellido
+          a.Nombres AS Nombres,
+          a.Apellido AS Apellido,
+          e.Nombre AS NombreEspecialidad
         FROM Inscripciones i
-        LEFT JOIN Alumnos a ON i.DNIAlumno = a.DNIAlumno
+        JOIN Alumnos a ON i.DNIAlumno = a.DNIAlumno
+        LEFT JOIN Especialidades e ON i.IdEspecialidad = e.IdEspecialidad
         ORDER BY i.FechaInscripcion DESC
       `)
       .all();
@@ -198,10 +200,12 @@ const getInscripcion = (req, res) => {
       .prepare(`
         SELECT 
           i.*, 
-          a.Nombre AS Nombre,
-          a.Apellido AS Apellido
+          a.Nombres AS Nombres,
+          a.Apellido AS Apellido,
+          e.Nombre AS NombreEspecialidad
         FROM Inscripciones i
-        LEFT JOIN Alumnos a ON i.DNIAlumno = a.DNIAlumno
+        JOIN Alumnos a ON i.DNIAlumno = a.DNIAlumno
+        JOIN Especialidades e ON i.IdEspecialidad = e.IdEspecialidad
         WHERE i.IdInscripcion = ?
       `)
       .get(id);
@@ -219,7 +223,6 @@ const getInscripcion = (req, res) => {
     return res.status(500).json({ error: "Error interno del servidor" });
   }
 };
-
 
 // Actualizar estado
 const updateState = (req, res) =>  {
