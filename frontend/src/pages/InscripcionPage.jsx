@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { InscripcionForm } from '../components/InscripcionForm';
 import {ToastContainer} from "react-toastify";
 
 export const InscripcionPage = () => {
-  const [formData, setFormData] = useState({
+  /*const [formData, setFormData] = useState({
     // Datos del estudiante
     nombreEstudiante: '',
     apellidoEstudiante: '',
@@ -33,11 +33,7 @@ export const InscripcionPage = () => {
     fotocopia_dni: false,
     certificadoMedico: false
   });
-  try {
-    
-  } catch (error) {
-    
-  }
+  */
   return (
     <div>
       <InscripcionForm></InscripcionForm>

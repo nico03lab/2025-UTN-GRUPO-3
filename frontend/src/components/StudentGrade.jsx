@@ -26,7 +26,10 @@ export const StudentGrade = ({materias = []}) => {
           <thead className='bg-base-200/50'>
             <tr>
               <th className="text-left font-bold text-base text-gray-700">Materia</th>
-              <th className="text-center font-bold text-base text-gray-700">Nota</th>
+              <th className="text-center font-bold text-base text-gray-700">Nota 1° Trimestre</th>
+              <th className="text-center font-bold text-base text-gray-700">Nota 2° Trimestre</th>
+              <th className="text-center font-bold text-base text-gray-700">Nota 3° Trimestre</th>
+              <th className="text-center font-bold text-base text-gray-700">Nota Final</th>
               <th className="text-left font-bold text-base text-gray-700">Observaciones</th>
             </tr>
           </thead>
@@ -41,8 +44,17 @@ export const StudentGrade = ({materias = []}) => {
                     </div>
                   </div>
                 </td >
-                <td className="py-4 text-center">
-                  <div className={getNotaClass(a.Nota)}>{a.Nota}</div>
+                <td className="py-3 text-center">
+                  <div className={getNotaClass(a.NotaTrimestral1)}>{a.NotaTrimestral1}</div>
+                </td>
+                <td className="py-3 text-center">
+                  <div className={getNotaClass(a.NotaTrimestral2)}>{a.NotaTrimestral2}</div>
+                </td>
+                <td className="py-3 text-center">
+                  <div className={getNotaClass(a.NotaTrimestral3)}>{a.NotaTrimestral3}</div>
+                </td>
+                <td className="py-3 text-center">
+                  <div className={getNotaClass(a.NotaFinal)}>{a.NotaFinal}</div>
                 </td>
                 <td className="py-4">
                   <div className="text-sm text-gray-700 max-w-xs">
