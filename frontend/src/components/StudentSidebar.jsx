@@ -32,7 +32,7 @@ export const StudentSidebar = ({ estudiantes, selectedEstudiante, setSelectedEst
             'hover:bg-base-200'}`}
         >
           <UserRoundCheck  className="h-5 w-5" />
-          Ver Asistencias y Faltas
+          Ver Inasistencias
         </button>
         <button 
           onClick={() => setTab('schedule')} 
