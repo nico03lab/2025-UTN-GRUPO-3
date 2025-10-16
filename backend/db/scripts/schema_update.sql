@@ -66,7 +66,7 @@ CREATE TABLE DatosMedicos (
     Alergias TEXT NULL,
     EnfermedadesPrevias TEXT NULL,
     Observaciones TEXT NULL,
-    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNI)
+    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNIAlumno)
 );
 
 -- Tutores
@@ -80,7 +80,7 @@ CREATE TABLE Tutores (
     TelefonoCel TEXT NULL,
     TelefonoLinea TEXT NULL,
     Email TEXT NULL,
-    IdUsuario TEXT NOT NULL,
+    IdUsuario TEXT NULL,
     FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario),
     FOREIGN KEY (IdLocalidad) REFERENCES Localidades(IdLocalidad)
 );
@@ -183,7 +183,7 @@ CREATE TABLE DocumentacionInscripciones (
     Archivo BLOB NULL,
     RutaArchivo TEXT NULL,
     FechaSubida DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (IdInscripcion) REFERENCES Solicitudes(IdSolicitud)
+    FOREIGN KEY (IdInscripcion) REFERENCES Inscripciones(IdInscripcion)
 );
 
 -- Asistencias
@@ -212,7 +212,7 @@ CREATE TABLE Boletines (
     Promedio REAL NULL,
     FechaGeneracion DATETIME DEFAULT CURRENT_TIMESTAMP,
     Observaciones TEXT NULL,
-    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNI)
+    FOREIGN KEY (DNIAlumno) REFERENCES Alumnos(DNIAlumno)
 );
 
 CREATE TABLE BoletinDetalle (
@@ -237,8 +237,8 @@ CREATE TABLE Usuarios (
 
 CREATE TABLE Mensajes (
     IdMensaje INTEGER PRIMARY KEY AUTOINCREMENT,
-    Emisor INTEGER NOT NULL,      -- IdUsuario
-    Receptor INTEGER NOT NULL,    -- IdUsuario
+    Emisor TEXT NOT NULL,      -- IdUsuario
+    Receptor TEXT NOT NULL,    -- IdUsuario
     Contenido TEXT NOT NULL,
     FechaEnvio DATETIME DEFAULT CURRENT_TIMESTAMP,
     Leido BOOLEAN DEFAULT 0,
@@ -249,14 +249,15 @@ CREATE TABLE Mensajes (
 CREATE TABLE Eventos (
     IdEvento INTEGER PRIMARY KEY AUTOINCREMENT,
     Titulo TEXT NOT NULL,
-    Descripcion TEXT NULL,
+    Descripcion TEXT,
     FechaInicio DATETIME NOT NULL,
-    FechaFin DATETIME NULL,
-    IdUsuario TEXT NOT NULL,   -- IdUsuario del docente que creó el evento
-    IdCurso TEXT NOT NULL,
-    FOREIGN KEY (IdCurso) REFERENCES Cursos(IdCurso),
-    FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario)
+    FechaFin DATETIME,
+    IdUsuarioCreador INTEGER NOT NULL,   -- docente o directivo que lo crea
+    Tipo TEXT NOT NULL,                  -- 'Examen', 'Reunión', 'Acto', etc.
+    Alcance TEXT NOT NULL DEFAULT 'Curso', -- 'Curso', 'Alumno', 'Global'
+    FOREIGN KEY (IdUsuarioCreador) REFERENCES Usuarios(IdUsuario)
 );
+
 
 CREATE TABLE EventosCursos (
     IdCurso TEXT NOT NULL,
@@ -266,9 +267,17 @@ CREATE TABLE EventosCursos (
     FOREIGN KEY (IdEvento) REFERENCES Eventos(IdEvento)
 );
 
+CREATE TABLE EventosUsuarios (
+    IdEvento INTEGER NOT NULL,
+    IdUsuario TEXT NOT NULL,
+    PRIMARY KEY (IdEvento, IdUsuario),
+    FOREIGN KEY (IdEvento) REFERENCES Eventos(IdEvento),
+    FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario)
+);
+
 CREATE TABLE Notificaciones (
     IdNotificacion INTEGER PRIMARY KEY AUTOINCREMENT,
-    IdUsuario INTEGER NOT NULL,   -- receptor
+    IdUsuario TEXT NOT NULL,   -- receptor
     Mensaje TEXT NOT NULL,
     Leida BOOLEAN DEFAULT 0,
     Fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -280,7 +289,7 @@ CREATE TABLE Notificaciones (
 CREATE TABLE DifusionCurso (
     IdDifusion INTEGER PRIMARY KEY AUTOINCREMENT,
     IdCurso TEXT NOT NULL,
-    IdUsuario INTEGER NOT NULL,   -- IdUsuario del docente
+    IdUsuario TEXT NOT NULL,   -- IdUsuario del docente
     Contenido TEXT NOT NULL,
     FechaEnvio DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (IdCurso) REFERENCES Cursos(IdCurso),

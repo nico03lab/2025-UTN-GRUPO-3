@@ -1,34 +1,38 @@
 
 ### crear inscripcion 
-POST http://localhost:3002/inscripcion
+POST http://localhost:3002/api/inscripcion
 Content-Type: application/json
 
 {
     "alumno": {
-        "dni": "1234",
+        "dni": "40000001",
         "nombre" : "Santiago",
         "apellido":  "Suarez",
-        "calle": "120",
-        "numero": "1",
-        "localidad": "Junin",
+        "calle": "San Martin",
+        "numero": "123",
+        "localidad": "La Plata",
         "provincia": "Buenos Aires",
-        "email": "santiago.fernandez@email.com"
+        "telefono": "1150078990",
+        "email": "s.fernandez@email.com",
+        "fechaNacimiento": "12-02-2003"
     },
     "tutor":{
-        "dni": "22345678",
-        "nombre": "Roberto",
-        "apellido": "Fernández",
-        "calle": "120",
-        "numero": "1",
+        "dni": "25000000",
+        "nombre": "Laura",
+        "apellido": "González",
+        "calle": "San Martín",
+        "numero": "123",
         "localidad": "La plata",
         "provincia": "Buenos Aires",
-        "telefonoCel": "11-5555-6666",
-        "telefonoLinea": "Claro",
-        "email": "roberto.fernandez@email.com"
+        "telefonoCel": "1161112233",
+        "telefonoLinea": "42110011",
+        "email": "l.gonzalez@correo.com"
     }, 
     "curso": {
-        "nivel": "1", 
-        "turno": "Tarde"
+        "nivel": "Secundario",
+        "grado": "1", 
+        "turno": "Mañana",
+        "especialidad": "Cs. Exactas"
     },
-    "relacion": "Padre"
+    "relacion": "Madre"
 }

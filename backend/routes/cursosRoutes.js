@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { getCursosPorProfe } = require('../controllers/cursosController');
+const { getCursos, getCursosPorProfe } = require('../controllers/cursosController');
 
-router.get('/:DNIDocente', getCursosPorProfe); // GET /api/cursos/:dniDocente
+router.get('/', getCursos);
+router.get('/:DNIDocente', getCursosPorProfe);
 
 module.exports = router;
