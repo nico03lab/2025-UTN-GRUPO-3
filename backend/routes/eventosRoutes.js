@@ -4,8 +4,7 @@ const router = express.Router();
 const { 
   getEventos, 
   getEventosPorCurso, 
-  getEventosCursoPorTutor, 
-  getEventosUsuarioPorTutor,
+  getEventosPorAlumno, 
   createEvento, 
   updateEvento, 
   deleteEvento 
@@ -13,11 +12,10 @@ const {
 
 // Rutas base
 router.get('/', getEventos); 
+router.get('/alumnos/:dniAlumno', getEventosPorAlumno)
 
 // Rutas específicas
-router.get('/:idCurso', getEventosPorCurso);
-router.get('/tutor/curso/:dniTutor', getEventosCursoPorTutor);
-router.get('/tutor/usuario/:dniTutor', getEventosUsuarioPorTutor);
+router.get('/cursos/:idCurso', getEventosPorCurso);
 
 // CRUD
 router.post('/', createEvento);

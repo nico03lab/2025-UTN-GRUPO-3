@@ -231,6 +231,7 @@ CREATE TABLE BoletinDetalle (
 CREATE TABLE Usuarios (
     IdUsuario TEXT PRIMARY KEY NOT NULL,
     NombreUsuario TEXT NOT NULL,
+    mail, TEXT NOT NULL,
     Pass TEXT NOT NULL,
     Tipo TEXT NOT NULL       -- Padre, docente, estudiante, directivo
 );
@@ -258,7 +259,6 @@ CREATE TABLE Eventos (
     FOREIGN KEY (IdUsuarioCreador) REFERENCES Usuarios(IdUsuario)
 );
 
-
 CREATE TABLE EventosCursos (
     IdCurso TEXT NOT NULL,
     IdEvento INTEGER NOT NULL,
@@ -277,14 +277,21 @@ CREATE TABLE EventosUsuarios (
 
 CREATE TABLE Notificaciones (
     IdNotificacion INTEGER PRIMARY KEY AUTOINCREMENT,
-    IdUsuario TEXT NOT NULL,   -- receptor
     Mensaje TEXT NOT NULL,
-    Leida BOOLEAN DEFAULT 0,
     Fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
     Tipo TEXT NOT NULL,           -- 'Evento', 'Mensaje', 'Difusion'
-    IdReferencia INTEGER NULL,    -- IdEvento o IdMensaje
+    IdReferencia INTEGER NULL    -- IdEvento o IdMensaje
+);
+
+CREATE TABLE NotificacionesUsuarios (
+    IdNotificacion INTEGER NOT NULL,
+    IdUsuario TEXT NOT NULL,
+    Leida BOOLEAN DEFAULT 0,
+    PRIMARY KEY (IdNotificacion, IdUsuario),
+    FOREIGN KEY (IdNotificacion) REFERENCES Notificaciones(IdNotificacion),
     FOREIGN KEY (IdUsuario) REFERENCES Usuarios(IdUsuario)
 );
+
 
 CREATE TABLE DifusionCurso (
     IdDifusion INTEGER PRIMARY KEY AUTOINCREMENT,

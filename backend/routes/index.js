@@ -7,7 +7,7 @@ router.use('/asistencias', require('./asistenciasRoutes'));
 router.use('/inscripcion', require('./inscripcionRoutes'));
 router.use('/documentos', require('./documentosRoutes'));
 router.use('/eventos', require('./eventosRoutes'));
-router.use('/notifaciones', require('./notificacionesRoutes'));
+router.use('/notificaciones', require('./notificacionesRoutes'));
 router.use('/usuarios', require('./usersRoutes'));
 //router.use('/mensajes', require('./mensajesRoutes'));
 //router.use('/difusion', require('./difusionRoutes'));

@@ -1,70 +1,118 @@
-const db = require("../db/db"); // tu conexión SQLite
+const db = require("../db/db");
 
 const getNotificaciones = (req, res) => {
-  const sql = `SELECT * FROM Notificaciones ORDER BY Fecha DESC`;
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    const stmt = db.prepare(`
+      SELECT *
+      FROM Notificaciones
+      ORDER BY datetime(Fecha) DESC
+    `);
+    const rows = stmt.all();
     res.json(rows);
-  });
+  } catch (err) {
+    console.error("getNotificaciones:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 const getNotificacionesPorUsuario = (req, res) => {
-  const { idUsuario } = req.params;
-  const sql = `
-      SELECT IdNotificacion, Mensaje, Leida, Fecha, Tipo, IdReferencia
-      FROM Notificaciones
-      WHERE IdUsuario = ?
-      ORDER BY Fecha DESC
-  `;
-  db.all(sql, [idUsuario], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    const { idUsuario } = req.params;
+    const stmt = db.prepare(`
+      SELECT n.IdNotificacion, n.Mensaje, nu.Leida, n.Fecha, n.Tipo, n.IdReferencia
+      FROM Notificaciones n
+      JOIN NotificacionesUsuarios nu ON n.IdNotificacion = nu.IdNotificacion
+      WHERE nu.IdUsuario = ?
+      ORDER BY datetime(Fecha) DESC
+    `);
+    const rows = stmt.all(idUsuario);
     res.json(rows);
-  });
+  } catch (err) {
+    console.error("getNotificacionesPorUsuario:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 const createNotificacion = (req, res) => {
-  const { idUsuario, mensaje, tipo, idReferencia } = req.body;
+  try {
+    const { idUsuario, mensaje, tipo, idReferencia } = req.body;
 
-  if (!idUsuario || !mensaje || !tipo) {
-    return res.status(400).json({ error: "Faltan campos obligatorios." });
-  }
+    if (!idUsuario || !mensaje || !tipo) {
+      return res.status(400).json({ error: "Faltan campos obligatorios." });
+    }
 
-  const sql = `
-    INSERT INTO Notificaciones (IdUsuario, Mensaje, Tipo, IdReferencia)
-    VALUES (?, ?, ?, ?)
-  `;
+    const stmt = db.prepare(`
+      INSERT INTO Notificaciones (Mensaje, Tipo, IdReferencia)
+      VALUES (?, ?, ?, ?)
+    `);
 
-  db.run(sql, [idUsuario, mensaje, tipo, idReferencia || null], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
+    const result = stmt.run(idUsuario, mensaje, tipo, idReferencia || null);
+
     res.status(201).json({
       message: "Notificación creada exitosamente.",
-      id: this.lastID,
+      id: result.lastInsertRowid,
     });
-  });
+  } catch (err) {
+    console.error("createNotificacion:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 const marcarNotificacionLeida = (req, res) => {
-  const { id } = req.params;
-  const sql = `UPDATE Notificaciones SET Leida = 1 WHERE IdNotificacion = ?`;
+  try {
+    const { idNotif, idUser } = req.params;
 
-  db.run(sql, [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    if (this.changes === 0)
-      return res.status(404).json({ error: "Notificación no encontrada." });
-    res.json({ message: "Notificación marcada como leída." });
-  });
+    if (!idNotif || !idUser) {
+      return res
+        .status(400)
+        .json({ error: "Faltan parámetros (idNotif o idUser)." });
+    }
+
+    const stmt = db.prepare(`
+      UPDATE NotificacionesUsuarios
+      SET Leida = 1
+      WHERE IdNotificacion = ? AND IdUsuario = ?
+    `);
+
+    const result = stmt.run(idNotif, idUser);
+
+    if (result.changes === 0) {
+      return res
+        .status(404)
+        .json({ error: "Notificación no encontrada o ya marcada como leída." });
+    }
+
+    res.json({
+      message: "Notificación marcada como leída.",
+      idNotif,
+      idUser,
+    });
+  } catch (err) {
+    console.error("marcarNotificacionLeida:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 const deleteNotificacion = (req, res) => {
-  const { id } = req.params;
-  const sql = `DELETE FROM Notificaciones WHERE IdNotificacion = ?`;
+  try {
+    const { id } = req.params;
 
-  db.run(sql, [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    if (this.changes === 0)
+    const stmt = db.prepare(`
+      DELETE FROM Notificaciones
+      WHERE IdNotificacion = ?
+    `);
+
+    const result = stmt.run(id);
+
+    if (result.changes === 0) {
       return res.status(404).json({ error: "Notificación no encontrada." });
+    }
+
     res.json({ message: "Notificación eliminada correctamente." });
-  });
+  } catch (err) {
+    console.error("deleteNotificacion:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 module.exports = {

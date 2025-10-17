@@ -15,7 +15,7 @@ router.get("/:idUsuario", getNotificacionesPorUsuario);
 
 router.post("/", createNotificacion);
 
-router.put("/:id/leida", marcarNotificacionLeida);
+router.put("/:idNotif/leida/:idUser", marcarNotificacionLeida);
 
 router.delete("/:id", deleteNotificacion);
 

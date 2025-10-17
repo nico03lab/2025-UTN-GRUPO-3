@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -29,56 +29,121 @@ function LegendItem({ color, icon: Icon, text }) {
   );
 }
 
-export default function CalendarTab({ eventos = [] }) {
+// Componente principal
+export default function CalendarTab({ dniAlumno }) {
+  const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+
+  // Cargar eventos desde backend
+
+  useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `http://localhost:3002/api/eventos/alumnos/${dniAlumno}`
+        );
+        if (!res.ok) throw new Error("Error al obtener eventos");
+        const data = await res.json();
+
+        // 🔧 Transformar los campos al formato esperado por FullCalendar
+        const eventosTransformados = data.map((ev) => ({
+          id: ev.IdEvento,
+          title: ev.Titulo,
+          start: ev.FechaInicio,
+          end: ev.FechaFin,
+          descripcion: ev.Descripcion,
+          tipo: ev.Tipo,
+          alcance: ev.Alcance,
+          creador: ev.IdUsuarioCreador,
+          allDay: true,
+        }));
+
+        setEventos(eventosTransformados);
+      } catch (err) {
+        console.error("Error cargando eventos:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEventos();
+  }, [dniAlumno]);
+
+
   // Normalizar eventos
+
   const eventosNormalizados = useMemo(() => {
     return eventos.map((e) => ({
       ...e,
       allDay: e.allDay ?? true,
+      backgroundColor:
+        e.tipo === "Examen"
+          ? "#ef4444" // rojo
+          : e.tipo === "Reunión"
+          ? "#facc15" // amarillo
+          : e.tipo === "Entrega"
+          ? "#3b82f6" // azul
+          : e.tipo === "Clase"
+          ? "#22c55e" // verde
+          : "#a855f7", // violeta por defecto
     }));
   }, [eventos]);
 
-  // Click en evento (alert demo, podés reemplazar con modal)
+
+  // Al hacer click en un evento
+
   const handleEventClick = (clickInfo) => {
-    const evento = clickInfo.event;
-    alert(
-      `📌 ${evento.title}\n` +
-        `📘 Materia: ${evento.extendedProps.materia || "-"}\n` +
-        `📂 Tipo: ${evento.extendedProps.tipo || "-"}\n` +
-        `📝 Descripción: ${evento.extendedProps.descripcion || "-"}\n` +
-        `📅 Fecha: ${evento.start.toLocaleDateString("es-ES")}`
-    );
+    const e = clickInfo.event.extendedProps;
+    const msg = [
+      `📌 ${clickInfo.event.title}`,
+      e.tipo && `📂 Tipo: ${e.tipo}`,
+      e.descripcion && `📝 Descripción: ${e.descripcion}`,
+      e.alcance && `🎯 Alcance: ${e.alcance}`,
+      e.creador && `👤 Creador: ${e.creador}`,
+      `📅 Fecha: ${clickInfo.event.start.toLocaleDateString("es-ES")}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    alert(msg);
   };
 
-  // Render visual de eventos con tooltip Tippy
+
+  // Render visual con tooltip
+
   const renderEventContent = (eventInfo) => {
-    const { event } = eventInfo;
-    const { materia, tipo, descripcion } = event.extendedProps;
+    const e = eventInfo.event.extendedProps;
+
+    // Mostrar solo lo que corresponda
+    const mostrarMateria = e.tipo === "Examen" || e.tipo === "Clase";
 
     return (
       <Tippy
         content={
           <div className="p-2 text-sm max-w-xs">
             <h3 className="font-bold text-base mb-1 flex items-center gap-1">
-              <Calendar size={16} /> {event.title}
+              <Calendar size={16} /> {eventInfo.event.title}
             </h3>
-            {materia && (
+            {mostrarMateria && (
               <p className="flex items-center gap-1">
-                <BookOpen size={14} /> {materia}
+                <BookOpen size={14} /> Materia relacionada
               </p>
             )}
-            {tipo && (
+            {e.tipo && (
               <p className="flex items-center gap-1">
-                <ClipboardList size={14} /> {tipo}
+                <ClipboardList size={14} /> {e.tipo}
               </p>
             )}
-            {descripcion && (
+            {e.descripcion && (
               <p className="flex items-center gap-1">
-                <FileText size={14} /> {descripcion}
+                <FileText size={14} /> {e.descripcion}
               </p>
             )}
             <p className="flex items-center gap-1">
-              <Calendar size={14} /> {event.start.toLocaleDateString("es-ES")}
+              <Calendar size={14} />{" "}
+              {eventInfo.event.start.toLocaleDateString("es-ES")}
             </p>
           </div>
         }
@@ -88,15 +153,17 @@ export default function CalendarTab({ eventos = [] }) {
         animation="shift-away"
       >
         <div className="p-1 truncate cursor-pointer">
-          <div className="font-semibold text-xs text-gray-600">
-            {eventInfo.timeText}
-          </div>
-          <div className="font-bold text-sm">{event.title}</div>
-          <div className="text-xs opacity-70">{materia}</div>
+          <div className="font-bold text-sm">{eventInfo.event.title}</div>
+          {mostrarMateria && (
+            <div className="text-xs opacity-70">Materia relacionada</div>
+          )}
         </div>
       </Tippy>
     );
   };
+
+
+  // Render principal
 
   return (
     <div className="calendar-container">
@@ -106,36 +173,40 @@ export default function CalendarTab({ eventos = [] }) {
       </h2>
 
       <div className="bg-base-200 p-4 rounded-xl shadow-lg">
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-          }}
-          buttonText={{
-            today: "Hoy",
-            month: "Mes",
-            week: "Semana",
-            day: "Día",
-            list: "Lista",
-          }}
-          locale={esLocale}
-          height="auto"
-          events={eventosNormalizados}
-          eventClick={handleEventClick}
-          eventContent={renderEventContent}
-          slotMinTime="07:00:00"
-          slotMaxTime="20:00:00"
-          nowIndicator={true}
-          dayMaxEvents={3}
-          expandRows={true}
-          stickyHeaderDates={true}
-        />
+        {loading ? (
+          <p className="text-center text-gray-500">Cargando eventos...</p>
+        ) : (
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title",
+              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+            }}
+            buttonText={{
+              today: "Hoy",
+              month: "Mes",
+              week: "Semana",
+              day: "Día",
+              list: "Lista",
+            }}
+            locale={esLocale}
+            height="auto"
+            events={eventosNormalizados}
+            eventClick={handleEventClick}
+            eventContent={renderEventContent}
+            slotMinTime="07:00:00"
+            slotMaxTime="20:00:00"
+            nowIndicator={true}
+            dayMaxEvents={3}
+            expandRows={true}
+            stickyHeaderDates={true}
+          />
+        )}
       </div>
 
-      {/* Leyenda con íconos Lucide */}
+      {/* Leyenda con íconos */}
       <div className="mt-6 flex flex-wrap gap-4 justify-center">
         <LegendItem color="bg-red-500" icon={GraduationCap} text="Exámenes" />
         <LegendItem color="bg-blue-500" icon={FileText} text="Entregas" />

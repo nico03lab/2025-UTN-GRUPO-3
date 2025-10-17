@@ -62,7 +62,18 @@ const padreService = {
         } catch (error) {
         throw error.response?.data || { message: 'Error al obtener asistencias' };
         }
-    }
+    },
+
+    getNotificaciones: async (idUsuario) => {
+        try {
+            const url = `${API_URL}/notificaciones/${idUsuario}`;
+            const response = await axios.get(url);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || { message: 'Error al obtener notificaciones' };
+        }
+    },
+
 };
 
 export default padreService;

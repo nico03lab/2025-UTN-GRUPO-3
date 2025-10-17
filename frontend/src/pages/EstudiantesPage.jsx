@@ -1,47 +1,46 @@
-import ScheduleTab from '../components/ScheduleTab';
+import ScheduleTab from "../components/ScheduleTab";
 import UserHeader from "../components/UserHeader";
-import { StudentSidebar } from '../components/StudentSidebar';
-import { StudentGrade } from '../components/StudentGrade';
-import CalendarTab from '../components/CalendarTab';
+import { StudentSidebar } from "../components/StudentSidebar";
+import { StudentGrade } from "../components/StudentGrade";
+import CalendarTab from "../components/CalendarTab";
 import { use, useEffect, useState } from "react";
-import MailboxTab from '../components/MailBoxTab';
-import padreService from '../components/TutorService';
-
+import MailboxTab from "../components/MailBoxTab";
+import padreService from "../components/TutorService";
 
 export const EstudiantesPage = () => {
   const [loading, setLoading] = useState(true); //estado inicial para la carga inicial
-  const [userLoaded, setUserLoaded] = useState(false);  // Nuevo estado para verificar si user está cargado
-  const [hijosLoaded, setHijosLoaded] = useState(false);  // Estado para hijos, si es necesario
-
+  const [userLoaded, setUserLoaded] = useState(false); // Nuevo estado para verificar si user está cargado
+  const [hijosLoaded, setHijosLoaded] = useState(false); // Estado para hijos, si es necesario
 
   const PADRE_ID = 25000000; // Hardcodeado por ahora, después viene del login, es el dni
-  
+
   const [user, setUser] = useState({});
   const [estudiantes, setEstudiantes] = useState([]);
   const [horarios, setHorarios] = useState([]);
   const [subjectsByStudent, setSubjectsByStudent] = useState([]);
-  const [tab, setTab] = useState('schedules');
+  const [tab, setTab] = useState("schedules");
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
 
-  useEffect(()=>{
+  useEffect(() => {
     cargarTutor();
   }, []);
-  const cargarTutor = async()=>{
-    try{
+  const cargarTutor = async () => {
+    try {
       const response = await padreService.getTutor(PADRE_ID);
       setUser({
         name: `${response.data.Nombre} ${response.data.Apellido}`,
-        email: response.data.Email
+        email: response.data.Email,
+        userId: response.data.IdUsuario,
       });
-    }catch (err){
-      console.error('Error cargando datos del tutor/user');
-    }finally{
-      setUserLoaded(true);  // Marca como cargado después de intentar cargar
+    } catch (err) {
+      console.error("Error cargando datos del tutor/user");
+    } finally {
+      setUserLoaded(true); // Marca como cargado después de intentar cargar
       checkAllLoaded();
     }
-  }
+  };
 
-   useEffect(() => {
+  useEffect(() => {
     cargarHijos();
   }, []);
 
@@ -50,94 +49,93 @@ export const EstudiantesPage = () => {
       const response = await padreService.getHijos(PADRE_ID);
 
       if (Array.isArray(response.data)) {
-      // Si response.data es un array, mapea cada elemento para agregar propiedades
-        const estudiantesArray = response.data.map(student => ({
-        IdEstudiante: student.DNIAlumno,  // Asume que DNIAlumno es el ID
-        Nivel: student.Nivel,
-        Grado: `${student.Grado}º ${student.Letra}`,  // Asume que Grado y Letra están en student
-        Nombre: student.Nombres,
-        Apellido: student.Apellido,
-        color: 'primary',  
-        dni: student.DNIAlumno
-      }));
-      setEstudiantes(estudiantesArray);  // Ahora es un array
-      if (estudiantesArray.length > 0) {
-        setSelectedEstudiante(estudiantesArray[0].IdEstudiante);  // Usa el ID del primer estudiante
-      };
-    } else {
-      console.error('response.data no es un array:', response.data);
-      setEstudiantes([]);  // Establece a un array vacío si no es un array
-    }
+        // Si response.data es un array, mapea cada elemento para agregar propiedades
+        const estudiantesArray = response.data.map((student) => ({
+          IdEstudiante: student.DNIAlumno, // Asume que DNIAlumno es el ID
+          Nivel: student.Nivel,
+          Grado: `${student.Grado}º ${student.Letra}`, // Asume que Grado y Letra están en student
+          Nombre: student.Nombres,
+          Apellido: student.Apellido,
+          color: "primary",
+          dni: student.DNIAlumno,
+        }));
+        setEstudiantes(estudiantesArray); // Ahora es un array
+        if (estudiantesArray.length > 0) {
+          setSelectedEstudiante(estudiantesArray[0].IdEstudiante); // Usa el ID del primer estudiante
+        }
+      } else {
+        console.error("response.data no es un array:", response.data);
+        setEstudiantes([]); // Establece a un array vacío si no es un array
+      }
     } catch (error) {
-      console.error('Error cargando hijos:', error);
+      console.error("Error cargando hijos:", error);
     } finally {
-      setHijosLoaded(true);  // Marca como cargado
-      checkAllLoaded();  // Verifica si todo está cargado
+      setHijosLoaded(true); // Marca como cargado
+      checkAllLoaded(); // Verifica si todo está cargado
     }
   };
 
   const checkAllLoaded = () => {
     if (userLoaded && hijosLoaded) {
-      setLoading(false);  // Solo establece loading en false cuando todo esté listo
+      setLoading(false); // Solo establece loading en false cuando todo esté listo
     }
   };
-  
-  useEffect(()=>{
-    if(selectedEstudiante){
+
+  useEffect(() => {
+    if (selectedEstudiante) {
       cargarHorarios();
     }
   }, [selectedEstudiante]);
 
-  const cargarHorarios = async () =>{
-    try{
+  const cargarHorarios = async () => {
+    try {
       const response = await padreService.getHorarios(selectedEstudiante);
 
-      const horariosArray = response.data.map(h => ({
+      const horariosArray = response.data.map((h) => ({
         dia: `${h.DiaSemana} - ${h.Materia}`,
         hora: `${h.HoraInicio} - ${h.HoraFin}`,
-        aula:  `${h.NumAula} - Curso: ${h.IdCurso}`
+        aula: `${h.NumAula} - Curso: ${h.IdCurso}`,
       }));
       console.log(horariosArray);
       setHorarios(horariosArray);
-
-    }catch (err){
-      console.error('Error al cargar los horarios');
-    }finally{
+    } catch (err) {
+      console.error("Error al cargar los horarios");
+    } finally {
       setLoading(false);
     }
-  }
+  };
 
-  useEffect(()=>{
-    if(selectedEstudiante){
+  useEffect(() => {
+    if (selectedEstudiante) {
       cargarNotas();
     }
   }, [selectedEstudiante]);
 
-  const cargarNotas = async ()=>{
+  const cargarNotas = async () => {
     try {
       const response = await padreService.getNotas(selectedEstudiante);
-     
-      const notasArray = response.data.map(h => ({
+
+      const notasArray = response.data.map((h) => ({
         Materia: h.Materia,
         Docente: `${h.Profesor_nombre} ${h.Profesor_apellido}`,
         NotaTrimestral1: h.NotaTrimestral1,
         NotaTrimestral2: h.NotaTrimestral2,
         NotaTrimestral3: h.NotaTrimestral3,
         NotaFinal: h.NotaFinal,
-        Obs: h.Observaciones
+        Obs: h.Observaciones,
       }));
       console.log(notasArray);
       setSubjectsByStudent(notasArray);
     } catch (error) {
-      console.error('Error al cargar las notas');
+      console.error("Error al cargar las notas");
     }
-  }
+  };
   useEffect(() => {
     const list = subjectsByStudent[selectedEstudiante] || [];
     const init = {};
-    list.forEach(a => (init[a.IdMateria] = false));
+    list.forEach((a) => (init[a.IdMateria] = false));
   }, [selectedEstudiante, subjectsByStudent]);
-   
+
   // Estados y datos de ejemplo
   /*const [user] = useState({ 
     name: 'Laura Perez', 
@@ -150,7 +148,7 @@ export const EstudiantesPage = () => {
   ]);*/
 
   //const [selectedEstudiante, setSelectedEstudiante] = useState(estudiantes[0].IdEstudiante);
-  
+
   /*const horarios = {
     1: [
       { dia: 'Lunes', hora: '08:00 - 09:30', aula: 'A101' },
@@ -162,7 +160,6 @@ export const EstudiantesPage = () => {
     ],
   };*/
 
-  
   /*const [subjectsByStudent, setSubjectsByStudent] = useState({});
 
   useEffect(()=>{
@@ -180,94 +177,97 @@ export const EstudiantesPage = () => {
     })
   }, []); 
 */
- 
-  
+
   // Datos de ejemplo para eventos del calendario
   const eventosPorEstudiante = {
     1: [
       {
         id: 1,
-        title: 'Examen de Historia',
+        title: "Examen de Historia",
         start: new Date(new Date().setDate(new Date().getDate() + 1)),
         end: new Date(new Date().setDate(new Date().getDate() + 1)),
         extendedProps: {
-          materia: 'Historia',
-          tipo: 'examen',
-          descripcion: 'Examen parcial del primer trimestre'
+          materia: "Historia",
+          tipo: "examen",
+          descripcion: "Examen parcial del primer trimestre",
         },
-        color: '#ef4444'
+        color: "#ef4444",
       },
       {
         id: 2,
-        title: 'Entrega de Proyecto - Química',
+        title: "Entrega de Proyecto - Química",
         start: new Date(new Date().setDate(new Date().getDate() + 3)),
         end: new Date(new Date().setDate(new Date().getDate() + 3)),
         extendedProps: {
-          materia: 'Química',
-          tipo: 'entrega',
-          descripcion: 'Proyecto de laboratorio'
+          materia: "Química",
+          tipo: "entrega",
+          descripcion: "Proyecto de laboratorio",
         },
-        color: '#3b82f6'
+        color: "#3b82f6",
       },
       {
         id: 3,
-        title: 'Clase Extra - Biología',
+        title: "Clase Extra - Biología",
         start: new Date(new Date().setDate(new Date().getDate() + 5)),
         end: new Date(new Date().setDate(new Date().getDate() + 5)),
         extendedProps: {
-          materia: 'Biología',
-          tipo: 'clase',
-          descripcion: 'Clase de repaso'
+          materia: "Biología",
+          tipo: "clase",
+          descripcion: "Clase de repaso",
         },
-        color: '#10b981'
-      }
+        color: "#10b981",
+      },
     ],
     2: [
       {
         id: 4,
-        title: 'Examen de Matemática',
+        title: "Examen de Matemática",
         start: new Date(new Date().setDate(new Date().getDate() + 2)),
         end: new Date(new Date().setDate(new Date().getDate() + 2)),
         extendedProps: {
-          materia: 'Matemática',
-          tipo: 'examen',
-          descripcion: 'Examen de geometría'
+          materia: "Matemática",
+          tipo: "examen",
+          descripcion: "Examen de geometría",
         },
-        color: '#ef4444'
+        color: "#ef4444",
       },
       {
         id: 5,
-        title: 'Olimpíada de Física',
+        title: "Olimpíada de Física",
         start: new Date(new Date().setDate(new Date().getDate() + 6)),
         end: new Date(new Date().setDate(new Date().getDate() + 6)),
         extendedProps: {
-          materia: 'Física',
-          tipo: 'evento',
-          descripcion: 'Competencia escolar'
+          materia: "Física",
+          tipo: "evento",
+          descripcion: "Competencia escolar",
         },
-        color: '#8b5cf6'
+        color: "#8b5cf6",
       },
       {
         id: 6,
-        title: 'Reunión de Padres',
+        title: "Reunión de Padres",
         start: new Date(new Date().setDate(new Date().getDate() + 8)),
         end: new Date(new Date().setDate(new Date().getDate() + 8)),
         extendedProps: {
-          materia: 'General',
-          tipo: 'reunion',
-          descripcion: 'Reunión informativa'
+          materia: "General",
+          tipo: "reunion",
+          descripcion: "Reunión informativa",
         },
-        color: '#f59e0b'
-      }
-    ]
+        color: "#f59e0b",
+      },
+    ],
   };
 
-  const [theme, setTheme] = useState('light');
-  const [notifications] = useState(4);
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("theme") || "light"
+  );
+
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
   };
-
 
   if (loading) {
     return (
@@ -275,16 +275,16 @@ export const EstudiantesPage = () => {
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
-  };
+  }
 
   return (
-    <div className='bg-base-200 min-h-screen'>
+    <div className="bg-base-200 min-h-screen">
       <div className="max-w-7xl mx-auto p-4 md:p-6">
         {/* Renderiza UserHeader solo si userLoaded es true */}
         {userLoaded ? (
           <UserHeader
             user={user}
-            notifications={4}  // O el valor que uses
+            notifications={4} // O el valor que uses
             theme={theme}
             toggleTheme={toggleTheme}
             onLogout={() => console.log("Cerrar sesión")}
@@ -293,10 +293,9 @@ export const EstudiantesPage = () => {
         ) : (
           <div className="bg-base-100 p-4 rounded-box shadow text-center">
             Cargando datos del usuario...
-          </div>  // Muestra un mensaje de carga o nada
+          </div> // Muestra un mensaje de carga o nada
         )}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
           <aside className="lg:col-span-1">
             <StudentSidebar
               estudiantes={estudiantes}
@@ -309,22 +308,13 @@ export const EstudiantesPage = () => {
 
           <main className="lg:col-span-3">
             <div className="bg-base-100 p-4 md:p-6 rounded-box shadow">
-
-              {tab === 'schedule' && (
-                <ScheduleTab horarios={horarios} />
-              )}
-              {tab === 'notes' && (
-                <StudentGrade
-                  materias={subjectsByStudent}
-                />
-              )}
-              {tab === 'calendar' && (
-                <CalendarTab eventos={eventosPorEstudiante[selectedEstudiante] || []} />
+              {tab === "schedule" && <ScheduleTab horarios={horarios} />}
+              {tab === "notes" && <StudentGrade materias={subjectsByStudent} />}
+              {tab === "calendar" && (
+                <CalendarTab dniAlumno={selectedEstudiante || []} />
               )}
 
-              {tab === 'mailbox' && (
-                <MailboxTab/>
-              )}
+              {tab === "mailbox" && <MailboxTab />}
             </div>
           </main>
         </div>
