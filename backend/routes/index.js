@@ -3,6 +3,7 @@ const router = express.Router();
 
 router.use('/alumnos', require('./alumnosRoutes'));
 router.use('/cursos', require('./cursosRoutes'));
+router.use('/docentes', require('./docentesRoutes'));
 router.use('/asistencias', require('./asistenciasRoutes'));
 router.use('/inscripcion', require('./inscripcionRoutes'));
 router.use('/documentos', require('./documentosRoutes'));
