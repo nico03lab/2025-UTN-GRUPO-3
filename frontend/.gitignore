@@ -11,6 +11,9 @@
 # production
 /build
 
+# Archivos de entorno reales
+.env
+
 # misc
 .DS_Store
 .env.local
