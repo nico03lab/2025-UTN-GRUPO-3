@@ -308,12 +308,8 @@ const cargarInasistencias = async () => {
       }
     ]
   };
-
-  const [theme, setTheme] = useState('light');
   const [notifications] = useState(4);
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
+  
 
 
   if (loading) {
@@ -332,8 +328,6 @@ const cargarInasistencias = async () => {
           <UserHeader
             user={user}
             notifications={4}  // O el valor que uses
-            theme={theme}
-            toggleTheme={toggleTheme}
             onLogout={() => console.log("Cerrar sesión")}
             onSettings={() => console.log("Abrir configuración")}
           />

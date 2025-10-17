@@ -9,7 +9,7 @@ export const StepsInscription = ({ currentStep, totalSteps }) => {
   return (
     <div className="bg-base-100 p-6 rounded-lg shadow-sm mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium">Progreso de Inscripción</h2>
+        <h2 className="text-bold text-lg font-medium">Progreso de Inscripción</h2>
       </div>
 
       {/* DaisyUI Steps con ✓ para pasos completados */}

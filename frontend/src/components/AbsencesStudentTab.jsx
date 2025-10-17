@@ -23,10 +23,10 @@ const AbsencesStudentTab = ({ inasistencias, faltasMateria }) => {
       <table className="table table-zebra w-full">
         <thead>
           <tr>
-            <th className="text-left font-bold text-base text-gray-700">Materia</th>
-             <th className="text-left font-bold text-base text-gray-700">Última Falta</th>
-            <th className="text-left font-bold text-base text-gray-700">Total Faltas</th>
-            <th className="text-left font-bold text-base text-gray-700">Ver Todas</th>
+            <th className="text-left font-bold text-base text-base-content">Materia</th>
+             <th className="text-left font-bold text-base text-base-content">Última Falta</th>
+            <th className="text-left font-bold text-base text-base-content">Total Faltas</th>
+            <th className="text-left font-bold text-base text-base-content">Ver Todas</th>
           </tr>
         </thead>
         <tbody>
@@ -83,7 +83,7 @@ const AbsencesStudentTab = ({ inasistencias, faltasMateria }) => {
                 })
             ) : (
                 <tr>
-                <td colSpan="3" className="text-center text-base text-gray-500">
+                <td colSpan="4" className="text-center text-base text-gray-500">
                     No hay datos de inasistencias.
                 </td>
                 </tr>

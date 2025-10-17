@@ -25,12 +25,12 @@ export const StudentGrade = ({materias = []}) => {
         <table className="table table-lg table-fixed w-full">
           <thead className='bg-base-200/50'>
             <tr>
-              <th className="text-left font-bold text-base text-gray-700">Materia</th>
-              <th className="text-center font-bold text-base text-gray-700">Nota 1° Trimestre</th>
-              <th className="text-center font-bold text-base text-gray-700">Nota 2° Trimestre</th>
-              <th className="text-center font-bold text-base text-gray-700">Nota 3° Trimestre</th>
-              <th className="text-center font-bold text-base text-gray-700">Nota Final</th>
-              <th className="text-left font-bold text-base text-gray-700">Observaciones</th>
+              <th className="text-left font-bold text-base text-base-content">Materia</th>
+              <th className="text-center font-bold text-base text-base-content">Nota 1° Trimestre</th>
+              <th className="text-center font-bold text-base text-base-content">Nota 2° Trimestre</th>
+              <th className="text-center font-bold text-base text-base-content">Nota 3° Trimestre</th>
+              <th className="text-center font-bold text-base text-base-content">Nota Final</th>
+              <th className="text-left font-bold text-base text-base-content">Observaciones</th>
             </tr>
           </thead>
           <tbody>
@@ -39,8 +39,8 @@ export const StudentGrade = ({materias = []}) => {
                 <td className="py-4">
                   <div className="flex flex-col gap-1">
                     <div>
-                      <div className="font-bold text-base-content">{a.Materia}</div>
-                      <div className="text-sm opacity-50 text-gray-600">Profesor/a: {a.Docente}</div>
+                      <div className="font-bold text-opacity-90">{a.Materia}</div>
+                      <div className="text-sm text-opacity-70">Profesor/a: {a.Docente}</div>
                     </div>
                   </div>
                 </td >
@@ -57,7 +57,7 @@ export const StudentGrade = ({materias = []}) => {
                   <div className={getNotaClass(a.NotaFinal)}>{a.NotaFinal}</div>
                 </td>
                 <td className="py-4">
-                  <div className="text-sm text-gray-700 max-w-xs">
+                  <div className="text-sm text-opacity-90 max-w-xs">
                     {a.Obs || 'Sin observaciones'} {/* Fallback para undefined */}
                   </div>
                 </td>

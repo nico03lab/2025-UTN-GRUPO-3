@@ -24,8 +24,8 @@ export const StudentSidebar = ({ estudiantes, selectedEstudiante, setSelectedEst
         ))}
       </div>
 
-      <div className="mt-6 border-t pt-4 opacity-70 text-sm space-y-2">
-        <button  //esta parte falta implementar
+      <div className="mt-6 border-t pt-4 opacity-90 text-sm space-y-2">
+        <button 
           onClick={() => setTab('absences')} 
           className={`flex items-center gap-3 w-full p-2 rounded-box ${tab === 'absences' ? 
             'bg-primary bg-opacity-70 text-accent-content' : 

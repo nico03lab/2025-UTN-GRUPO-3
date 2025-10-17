@@ -1,6 +1,7 @@
 import { BellIcon, CogIcon, MoonIcon, SunIcon, XCircleIcon} from '@heroicons/react/24/outline';
+import ThemeToggle from './ThemeToggle';
 
-export default function UserHeader({ user, notifications = 0, toggleTheme, theme = 'light', onLogout, onSettings}) {
+export default function UserHeader({ user, notifications = 0, onLogout, onSettings}) {
     return (
         <header className="flex items-center justify-between mb-6 bg-base-100 p-4 rounded-box shadow">
             {/* Avatar y nombre */}
@@ -40,21 +41,7 @@ export default function UserHeader({ user, notifications = 0, toggleTheme, theme
                         </div>
                     </div>
                 </div>
-
-                {/* Toggle tema */}
-                <button 
-                type="button" 
-                className="btn btn-ghost btn-circle" 
-                onClick={toggleTheme} 
-                aria-label="Cambiar tema"
-                >
-                    {theme === 'light' ? (
-                        <MoonIcon className="h-5 w-5" />
-                    ) : (
-                        <SunIcon className="h-5 w-5" />
-                    )}
-                </button>
-
+                <ThemeToggle />
                 {/* Configuración */}
                 <button 
                 type="button" 
