@@ -1,126 +1,239 @@
-import React, { useState } from "react";
-import { BellIcon, CogIcon, MoonIcon, SunIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-// UserHeader con Tailwind
-const UserHeader = ({ user, notifications = 0, toggleTheme, theme = 'light', onLogout, onSettings }) => {
-  return (
-    <header className="flex items-center justify-between mb-6 bg-base-100 p-4 rounded-box shadow">
-      {/* Avatar y nombre */}
-      <div className="flex items-center gap-4">
-        <div className="avatar online">
-          <div className="w-12 h-12 rounded-full bg-primary text-primary-content flex items-center justify-center text-lg font-semibold">
-            {user.nombre.charAt(0)}
-          </div>
-        </div>
-        <div>
-          <div className="text-lg font-semibold">{user.nombre}</div>
-          <div className="text-sm opacity-70">{user.email}</div>
-        </div>
-      </div>
+// 🧩 Componentes comunes
+import UserHeader from "../components/UserHeader";
+import StatsPanel from "../components/Statspanel";
+import Solicitudes from "../pages/solicitudes";
 
-      {/* Acciones */}
-      <div className="flex items-center gap-2">
-        {/* Notificaciones */}
-        <div className="dropdown dropdown-end">
-          <button type="button" className="btn btn-ghost btn-circle" aria-label="Notificaciones">
-            <div className="indicator">
-              <BellIcon className="h-5 w-5" />
-              {notifications > 0 && (
-                <span className="badge badge-xs badge-primary indicator-item">{notifications}</span>
-              )}
-            </div>
-          </button>
-          <div tabIndex={0} className="mt-3 z-[1] card card-compact dropdown-content w-52 bg-base-100 shadow">
-            <div className="card-body">
-              <span className="font-bold text-lg">{notifications} Notificaciones</span>
-              <span className="text-info">Tienes mensajes sin leer</span>
-            </div>
-          </div>
-        </div>
+// 🧩 Tabs (cada uno modular)
+import InscriptionsTab from "../components/InscriptionTab";
+import TransferTab from "../components/StudentTransferTab";
+import AdminCourseSidebar from "../components/AdminCourseSidebar";
+import AdminCourseList from "../components/AdminCourseList"
+import AdminAttendanceTab from "./AdminAttendanceTab";
+import ReportsTab from "../components/ReportsTab";
+import AlumnosManage from "./AlumnosManage";
 
-        {/* Toggle tema */}
-        <button type="button" className="btn btn-ghost btn-circle" onClick={toggleTheme} aria-label="Cambiar tema">
-          {theme === "light" ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
-        </button>
+export default function DirectivoDashboard() {
+  const [user] = useState({
+    dni: "20111222",
+    id: "admin-001",
+    name: "Lic. Ana García",
+    email: "a.garcia@colegio.edu",
+    role: "Directora",
+  });
 
-        {/* Configuración */}
-        <button type="button" className="btn btn-ghost btn-circle" onClick={onSettings} aria-label="Configuración">
-          <CogIcon className="h-6 w-6" />
-        </button>
+  const API_BASE_URL = "http://localhost:3002/api";
 
-        {/* Cerrar sesión */}
-        <button type="button" className="btn btn-outline btn-sm flex items-center gap-2" onClick={onLogout}>
-          <XCircleIcon className="h-4 w-4" />
-          Cerrar sesión
-        </button>
-      </div>
-    </header>
-  );
-};
+  // 📊 Estados globales
+  const [notifications] = useState(5);
+  const [tab, setTab] = useState("");
 
-// DashboardDirectivo integrado
-const DashboardDirectivo = () => {
-  const directivo = {
-    nombre: "Jorge Perez",
-    email: "jorge.perez91218@gmail.com",
-    fotoUrl: "", 
+  // 📚 Datos
+    // Tabs principales: Cursos / Alumnos / Docentes / Inscripciones
+  const [mainTab, setMainTab] = useState("cursos");
+  const [cursos, setCursos] = useState([]);
+  const [selectedCurso, setSelectedCurso] = useState(null);
+  const [alumnos, setAlumnos] = useState([]);
+  const [alumnosByCurso, setAlumnosByCurso] = useState([]);
+  const [inscripciones, setInscripciones] = useState([]);
+  const [asistencias, setAsistencias] = useState([]);
+
+  // 🎯 Filtros
+  const [filters, setFilters] = useState({
+    nivel: "",
+    turno: "",
+    grado: "",
+  });
+
+
+  // ==============================
+  // 📡 CARGA DE DATOS
+  // ==============================
+
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/cursos`)
+      .then(res => {
+        console.log("✅ Cursos obtenidos:", res.data);
+        setCursos(res.data);
+      })
+      .catch(err => console.error("❌ Error al obtener cursos:", err));
+  }, []);
+/*
+  useEffect(() => {
+      if (selectedCurso) {
+        axios.get(`${API_BASE_URL}/alumnos/${selectedCurso}`)
+          .then(res => {
+            const initAttendance = {};
+            res.data.forEach(a => initAttendance[a.DNIAlumno] = false);
+            setAttendance(initAttendance);
+            setAlumnosByCurso(res.data);
+          })
+          .catch(err => console.error(err));
+      } else {
+        setAlumnosByCurso([]);
+        setAttendance({});
+      }
+    }, [selectedCurso]);
+*/
+  // ==============================
+  // ⚙️ ACCIONES CRUD
+  // ==============================
+
+  const approveInscription = (id) => {
+    axios
+      .put(`${API_BASE_URL}/inscripciones/${id}/aprobar`)
+      .then(() => {
+        setInscripciones((prev) => prev.filter((i) => i.id !== id));
+        showToast("Inscripción aprobada correctamente", "success");
+      })
+      .catch(() => showToast("Error al aprobar inscripción", "error"));
   };
 
-  const [theme, setTheme] = useState("light");
-  const [notifications, setNotifications] = useState(3);
 
-  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
-  const handleClick = (tipo) => alert(`Mostrando: ${tipo}`);
-  const handleLogout = () => alert("Cerrando sesión...");
-  const handleSettings = () => alert("Abrir configuración...");
+  // ==============================
+  // 💬 UTILIDADES
+  // ==============================
 
+  const showToast = (msg, type = "info") => {
+    const toast = document.getElementById("toast");
+    const msgEl = document.getElementById("toast-message");
+    toast.className = `toast toast-top toast-end alert alert-${type}`;
+    msgEl.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
+  };
+
+
+  const updateFilter = (k, v) => setFilters((p) => ({ ...p, [k]: v }));
+
+  const stats = {
+    totalAlumnos: alumnos.length,
+    totalCursos: cursos.length,
+    inscripcionesPendientes: inscripciones.length,
+    asistenciaPromedio: 94.5,
+    promedioGeneral: 8.2,
+  };
+
+  // ==============================
+  // 🧩 RENDER
+  // ==============================
   return (
-    <div
-      className={`min-h-screen w-full ${theme === "light" ? "bg-gray-100" : "bg-gray-800"} relative`}
-      style={{
-        backgroundImage: "url()",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-      }}
-    >
-      {/* UserHeader arriba */}
-      <div className="absolute top-5 left-5 right-5">
-        <UserHeader
-          user={directivo}
-          notifications={notifications}
-          toggleTheme={toggleTheme}
-          theme={theme}
-          onLogout={handleLogout}
-          onSettings={handleSettings}
-        />
+    <div className="min-h-screen bg-base-200">
+      {/* Toast temporal (si lo usas) */}
+      <div id="toast" className="toast toast-top toast-end hidden">
+        <div className="alert">
+          <span id="toast-message">Operación realizada con éxito.</span>
+        </div>
       </div>
 
-      {/* Menú en el centro */}
-      <div className="flex justify-center items-center h-full">
-        <nav>
-          <ul className="space-y-5 list-none p-0 m-0">
-            {[
-              "Alumnos 👦👧",
-              "Listado de solicitudes de inscripción pendientes 📅",
-              "Solicitudes de inscripción aprobadas ✅",
-              "Solicitudes de inscripción rechazadas ❌",
-            ].map((item, index) => (
-              <li key={index}>
-                <button
-                  onClick={() => handleClick(item)}
-                  className="w-72 px-5 py-3 text-left bg-beige text-black rounded-lg shadow-md transition-transform duration-300 hover:bg-white hover:scale-105"
-                >
-                  {item}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
+      {/* Header general */}
+      <div className="max-w-7xl mx-auto p-4 md:p-6">
+        <UserHeader
+          user={user}
+          notifications={notifications}
+        />
+
+        {/* ====================== */}
+        {/* 🧭 Pestañas principales */}
+        {/* ====================== */}
+        <div role="tablist" className="tabs tabs-boxed my-6">
+          <button
+            role="tab"
+            className={`tab text-sm font-semibold ${mainTab === "cursos" ? "tab-active" : ""}`}
+            onClick={() => setMainTab("cursos")}
+          >
+            📘 Gestión de Cursos
+          </button>
+          <button
+            role="tab"
+            className={`tab text-sm font-semibold ${mainTab === "alumnos" ? "tab-active" : ""}`}
+            onClick={() => setMainTab("alumnos")}
+          >
+            🎓 Gestión de Alumnos
+          </button>
+          <button
+            role="tab"
+            className={`tab text-sm font-semibold ${mainTab === "docentes" ? "tab-active" : ""}`}
+            onClick={() => setMainTab("docentes")}
+          >
+            👩‍🏫 Gestión de Docentes
+          </button>
+          <button
+            role="tab"
+            className={`tab text-sm font-semibold ${mainTab === "inscripciones" ? "tab-active" : ""}`}
+            onClick={() => setMainTab("inscripciones")}
+          >
+            📝 Gestión de Inscripciones
+          </button>
+        </div>
+
+        {/* ====================== */}
+        {/* Contenido por pestaña */}
+        {/* ====================== */}
+
+        {mainTab === "cursos" && (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Sidebar */}
+            <aside className="lg:col-span-1">
+              <AdminCourseSidebar
+                cursos={cursos}
+                selectedCurso={selectedCurso}
+                setSelectedCurso={setSelectedCurso}
+                tab={tab}
+                setTab={setTab}
+                filters={filters}
+                setFilters={setFilters}
+              />
+              <StatsPanel stats={stats} />
+            </aside>
+
+            {/* Main */}
+            <main className="lg:col-span-3 flex flex-col gap-4">
+              <AdminCourseList
+                cursos={cursos}
+                filtros={filters}
+                selectedCurso={selectedCurso}
+                setSelectedCurso={setSelectedCurso}
+              />
+
+              <div className="bg-base-100 p-4 md:p-6 rounded-box shadow min-h-[300px]">
+                {tab === "solicitudes" && <Solicitudes />}
+                {tab === "attendance" && selectedCurso && (
+                  <AdminAttendanceTab
+                    asistencias={asistencias}
+                    curso={selectedCurso}
+                    onFilterChange={updateFilter}
+                  />
+                )}
+                {tab === "reports" && <ReportsTab />}
+              </div>
+            </main>
+          </div>
+        )}
+
+        {mainTab === "alumnos" && (
+          <div className="bg-base-100 p-8 rounded-box shadow">
+            <h2 className="text-xl font-semibold mb-3">🎓 Gestión de Alumnos</h2>
+            <AlumnosManage/>
+          </div>
+        )}
+
+        {mainTab === "docentes" && (
+          <div className="bg-base-100 p-8 rounded-box shadow">
+            <h2 className="text-xl font-semibold mb-3">👩‍🏫 Gestión de Docentes</h2>
+            <p className="opacity-70">En esta sección se gestionan los docentes, materias asignadas y reportes.</p>
+          </div>
+        )}
+
+        {mainTab === "inscripciones" && (
+          <div className="bg-base-100 p-8 rounded-box shadow">
+            <h2 className="text-xl font-semibold mb-3">📝 Gestión de Inscripciones</h2>
+            <Solicitudes/>
+          </div>
+        )}
       </div>
     </div>
   );
-};
-
-export default DashboardDirectivo;
+}

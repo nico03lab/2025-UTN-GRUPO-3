@@ -1,34 +1,3 @@
 
-### crear inscripcion 
-POST http://localhost:3002/inscripcion
-Content-Type: application/json
-
-{
-    "alumno": {
-        "dni": "1234",
-        "nombre" : "Santiago",
-        "apellido":  "Suarez",
-        "calle": "120",
-        "numero": "1",
-        "localidad": "Junin",
-        "provincia": "Buenos Aires",
-        "email": "santiago.fernandez@email.com"
-    },
-    "tutor":{
-        "dni": "22345678",
-        "nombre": "Roberto",
-        "apellido": "Fernández",
-        "calle": "120",
-        "numero": "1",
-        "localidad": "La plata",
-        "provincia": "Buenos Aires",
-        "telefonoCel": "11-5555-6666",
-        "telefonoLinea": "Claro",
-        "email": "roberto.fernandez@email.com"
-    }, 
-    "curso": {
-        "nivel": "1", 
-        "turno": "Tarde"
-    },
-    "relacion": "Padre"
-}
+###
+GET http://localhost:3002/api/alumnos/estudiante/51000000/horarios

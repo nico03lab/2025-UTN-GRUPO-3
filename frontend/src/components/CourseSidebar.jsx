@@ -8,12 +8,12 @@ export default function CourseSidebar({ cursos, selectedCurso, setSelectedCurso,
       <div className="space-y-2">
         {Array.isArray(cursos) && cursos.map((c, index) => {
           return (
-<button
-  key={c.IdCurso}
-  onClick={() => { setSelectedCurso(c.IdCurso); setTab('attendance'); }}
-  className={`w-full text-left p-3 rounded-box flex items-center gap-3 relative overflow-hidden 
-             transition-all duration-200 transform active:scale-95
-             ${selectedCurso === c.IdCurso 
+            <button
+              key={c.IdCurso}
+              onClick={() => { setSelectedCurso(c.IdCurso)}}
+              className={`w-full text-left p-3 rounded-box flex items-center gap-3 relative overflow-hidden 
+              transition-all duration-200 transform active:scale-95
+              ${selectedCurso === c.IdCurso 
                ? 'bg-emerald-800 text-white shadow-md' 
                : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
 >
