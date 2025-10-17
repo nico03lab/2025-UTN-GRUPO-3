@@ -3,7 +3,7 @@ const db = require('../db/db');
 const PadreModel = {
   //obtener al tutor
   getTutor: async (padreId) => {
-    console.log('🔍 Buscando Tutor para padre ID:', padreId);
+    console.log('Buscando Tutor para padre ID:', padreId);
     try{
       const rows = await db.prepare(`
       SELECT 
@@ -107,20 +107,23 @@ const PadreModel = {
     }
   },
 
-  // Obtener asistencias de un estudiante, falta implementar!!!
+  // Obtener inasistencias de un estudiante
   getInasistenciasEstudiante: async (estudianteId) => {
+    console.log("Datos del estudiante", estudianteId);
     try {
       const rows = await db.prepare(`
         SELECT 
-          m.Nombre as Materia,
+		      a.IdCurso,
+		      m.Nombre as Materia,
           a.Fecha,
           da.Presente
         FROM Asistencias a 
         JOIN DetalleAsistencia da ON da.IdAsistencia = a.IdAsistencia
         JOIN Materias m ON a.IdMateria = m.IdMateria
         WHERE da.DNIAlumno = ?
+        ORDER BY Materia, a.Fecha DESC
       `).all(estudianteId);
-      
+      console.log('Inasistencias', rows);
       return rows;
     } catch (error) {
       throw error;

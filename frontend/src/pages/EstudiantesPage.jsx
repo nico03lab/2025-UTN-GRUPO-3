@@ -6,6 +6,7 @@ import CalendarTab from '../components/CalendarTab';
 import { use, useEffect, useState } from "react";
 import MailboxTab from '../components/MailBoxTab';
 import padreService from '../components/TutorService';
+import AbsencesStudentTab from '../components/AbsencesStudentTab';
 
 
 export const EstudiantesPage = () => {
@@ -22,6 +23,9 @@ export const EstudiantesPage = () => {
   const [subjectsByStudent, setSubjectsByStudent] = useState([]);
   const [tab, setTab] = useState('schedules');
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
+  const [inasistencias, setInasistencias] = useState([]);
+  const [faltasPorMateria, setFaltasPorMateria] = useState([]);
+
 
   useEffect(()=>{
     cargarTutor();
@@ -106,6 +110,49 @@ export const EstudiantesPage = () => {
       setLoading(false);
     }
   }
+  
+  useEffect(()=>{
+    if (selectedEstudiante){
+      cargarInasistencias();
+    }
+  }, [selectedEstudiante]);
+
+
+const cargarInasistencias = async () => {
+  try {
+    const response = await padreService.getInasistencias(selectedEstudiante);
+    
+    // Array de inasistencias
+    const inasistenciasArray = response.data.map(h => ({
+      IdCurso: h.IdCurso,
+      Materia: h.Materia,
+      Fecha: h.Fecha,
+      Presente: h.Presente ? 'Presente' : 'Ausente'
+    }));
+    
+    // Contar faltas por materia
+    const faltasContadas = response.data.reduce((acc, h) => {
+      if (!h.Presente) {
+        acc[h.Materia] = (acc[h.Materia] || 0) + 1;
+      }
+      return acc;
+    }, {});
+    
+    // Convertir a array
+    const faltasPorMateriaArray = Object.entries(faltasContadas).map(([materia, faltas]) => ({
+      Materia: materia,
+      TotalFaltas: faltas
+    }));
+    setInasistencias(inasistenciasArray);
+    setFaltasPorMateria(faltasPorMateriaArray);
+    
+    
+  } catch (error) {
+    console.error('Error al cargar inasistencias:', error);
+  }finally{
+      setLoading(false);
+  }
+};
 
   useEffect(()=>{
     if(selectedEstudiante){
@@ -309,7 +356,9 @@ export const EstudiantesPage = () => {
 
           <main className="lg:col-span-3">
             <div className="bg-base-100 p-4 md:p-6 rounded-box shadow">
-
+              {tab === 'absences' && (
+                <AbsencesStudentTab inasistencias = {inasistencias} faltasMateria = {faltasPorMateria}/>
+              )}
               {tab === 'schedule' && (
                 <ScheduleTab horarios={horarios} />
               )}

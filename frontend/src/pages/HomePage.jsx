@@ -1,6 +1,5 @@
 import CardNota from "../components/CardNota";
 import {UserCheck} from "lucide-react";
-import { BookUser } from 'lucide-react';
 import { GraduationCap } from 'lucide-react';
 import { Users } from 'lucide-react';
 import { UserLock } from 'lucide-react';
