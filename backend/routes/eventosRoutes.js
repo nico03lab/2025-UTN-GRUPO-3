@@ -1,10 +1,25 @@
 const express = require('express');
 const router = express.Router();
 
-const { getEventos, getEventosPorCurso, getEventosPorTutor } = require('../controllers/cursosController');
+const { 
+  getEventos, 
+  getEventosPorCurso, 
+  getEventosPorAlumno, 
+  createEvento, 
+  updateEvento, 
+  deleteEvento 
+} = require('../controllers/eventosController');
 
+// Rutas base
 router.get('/', getEventos); 
-router.get('/:idCurso', getEventosPorCurso);
-router.get('/:dniPadre', getEventosPorTutor);
+router.get('/alumnos/:dniAlumno', getEventosPorAlumno)
 
-module.export = router;
+// Rutas específicas
+router.get('/cursos/:idCurso', getEventosPorCurso);
+
+// CRUD
+router.post('/', createEvento);
+router.put('/:id', updateEvento);
+router.delete('/:id', deleteEvento);
+
+module.exports = router;

@@ -21,8 +21,9 @@ export const HomePage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
         <CardNota texto="Inscripcion" path="/inscripcion" descripcion="Gestion de inscripciones" icon={UserCheck}/>
         <CardNota texto="Docente" path="/docente" descripcion="Portal de docentes" icon={Users}/>
-        <CardNota texto="Estudiantes" path="/estudiantes" descripcion="Portal de estudiantes y padres" icon={GraduationCap}/>
+        <CardNota texto="Tutores" path="/tutores" descripcion="Portal de padres" icon={GraduationCap}/>
         <CardNota texto="Directivos" path="/directivos" descripcion="Portal de directivos" icon={UserLock}/>
+        <CardNota texto="Alumnos" path="/alumnos" descripcion="Portal de alumnos" icon={UserLock}/>
       </div>
     </div>
     </div>

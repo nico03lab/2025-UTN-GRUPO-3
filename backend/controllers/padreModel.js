@@ -9,7 +9,8 @@ const PadreModel = {
       SELECT 
         Nombre,
         Apellido,
-        Email
+        Email,
+        IdUsuario
       FROM Tutores 
       WHERE DNITutor = ?
       `).get(padreId);
