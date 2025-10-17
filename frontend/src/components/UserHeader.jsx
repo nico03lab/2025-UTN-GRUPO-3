@@ -3,19 +3,18 @@ import axios from "axios";
 import {
   BellIcon,
   CogIcon,
-  MoonIcon,
-  SunIcon,
   XCircleIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
+import { useTheme } from "./ThemeContext";
+import ThemeToggle from "./ThemeToggle";
 
 export default function UserHeader({
   user,
-  toggleTheme,
-  theme = "light",
   onLogout,
   onSettings,
 }) {
+  const { theme } = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -188,18 +187,7 @@ export default function UserHeader({
           )}
         </div>
 
-        {/* Tema */}
-        <button
-          type="button"
-          className="btn btn-ghost btn-circle"
-          onClick={toggleTheme}
-        >
-          {theme === "light" ? (
-            <MoonIcon className="h-5 w-5" />
-          ) : (
-            <SunIcon className="h-5 w-5" />
-          )}
-        </button>
+        <ThemeToggle />
 
         {/* Configuración */}
         <button

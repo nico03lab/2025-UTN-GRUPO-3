@@ -6,6 +6,7 @@ import CalendarTab from "../components/CalendarTab";
 import { use, useEffect, useState } from "react";
 import MailboxTab from "../components/MailBoxTab";
 import padreService from "../components/TutorService";
+import AbsencesStudentTab from "../components/AbsencesStudentTab";
 
 export const EstudiantesPage = () => {
   const [loading, setLoading] = useState(true); //estado inicial para la carga inicial
@@ -20,6 +21,8 @@ export const EstudiantesPage = () => {
   const [subjectsByStudent, setSubjectsByStudent] = useState([]);
   const [tab, setTab] = useState("schedules");
   const [selectedEstudiante, setSelectedEstudiante] = useState(null);
+  const [inasistencias, setInasistencias] = useState([]);
+  const [faltasPorMateria, setFaltasPorMateria] = useState([]);
 
   useEffect(() => {
     cargarTutor();
@@ -100,6 +103,48 @@ export const EstudiantesPage = () => {
       setHorarios(horariosArray);
     } catch (err) {
       console.error("Error al cargar los horarios");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedEstudiante) {
+      cargarInasistencias();
+    }
+  }, [selectedEstudiante]);
+
+  const cargarInasistencias = async () => {
+    try {
+      const response = await padreService.getInasistencias(selectedEstudiante);
+
+      // Array de inasistencias
+      const inasistenciasArray = response.data.map((h) => ({
+        IdCurso: h.IdCurso,
+        Materia: h.Materia,
+        Fecha: h.Fecha,
+        Presente: h.Presente ? "Presente" : "Ausente",
+      }));
+
+      // Contar faltas por materia
+      const faltasContadas = response.data.reduce((acc, h) => {
+        if (!h.Presente) {
+          acc[h.Materia] = (acc[h.Materia] || 0) + 1;
+        }
+        return acc;
+      }, {});
+
+      // Convertir a array
+      const faltasPorMateriaArray = Object.entries(faltasContadas).map(
+        ([materia, faltas]) => ({
+          Materia: materia,
+          TotalFaltas: faltas,
+        })
+      );
+      setInasistencias(inasistenciasArray);
+      setFaltasPorMateria(faltasPorMateriaArray);
+    } catch (error) {
+      console.error("Error al cargar inasistencias:", error);
     } finally {
       setLoading(false);
     }
@@ -258,17 +303,6 @@ export const EstudiantesPage = () => {
     ],
   };
 
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem("theme") || "light"
-  );
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
@@ -284,9 +318,6 @@ export const EstudiantesPage = () => {
         {userLoaded ? (
           <UserHeader
             user={user}
-            notifications={4} // O el valor que uses
-            theme={theme}
-            toggleTheme={toggleTheme}
             onLogout={() => console.log("Cerrar sesión")}
             onSettings={() => console.log("Abrir configuración")}
           />
@@ -308,12 +339,17 @@ export const EstudiantesPage = () => {
 
           <main className="lg:col-span-3">
             <div className="bg-base-100 p-4 md:p-6 rounded-box shadow">
+              {tab === "absences" && (
+                <AbsencesStudentTab
+                  inasistencias={inasistencias}
+                  faltasMateria={faltasPorMateria}
+                />
+              )}
               {tab === "schedule" && <ScheduleTab horarios={horarios} />}
               {tab === "notes" && <StudentGrade materias={subjectsByStudent} />}
               {tab === "calendar" && (
                 <CalendarTab dniAlumno={selectedEstudiante || []} />
               )}
-
               {tab === "mailbox" && <MailboxTab />}
             </div>
           </main>

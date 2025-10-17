@@ -15,7 +15,7 @@ router.get('/tutor/:padreId/hijos', padreController.getHijos); //obtener todos l
 //router.get('/:padreId/estudiante/:estudianteId', padreController.getHijoCompleto); //obtener info completa de un hijo
 router.get('/estudiante/:estudianteId/notas', padreController.getNotas); //Obtener solo notas de un estudiante
 router.get('/estudiante/:estudianteId/horarios', padreController.getHorarios); //Obtener solo horarios de un estudiante
-router.get('/estudiante/:estudianteId/asistencias', padreController.getInasistencias); //Obtener asistencias de un estudiante
+router.get('/estudiante/:estudianteId/inasistencias', padreController.getInasistencias); //Obtener asistencias de un estudiante
 
 
 

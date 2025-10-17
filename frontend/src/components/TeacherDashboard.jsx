@@ -24,7 +24,6 @@ export default function TeacherDashboard() {
   const [alumnosByCurso, setAlumnosByCurso] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [grades, setGrades] = useState({});
-  const [theme, setTheme] = useState('light');
   const [notifications] = useState(3);
 
   useEffect(() => {
@@ -116,12 +115,9 @@ export default function TeacherDashboard() {
     calificacionPromedio: 7.8
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
 
   return (
-    <div data-theme={theme} className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-base-200">
       {/* Toast de notificación */}
       <div id="toast" className="toast toast-top toast-end hidden">
         <div className="alert alert-info">
@@ -133,8 +129,6 @@ export default function TeacherDashboard() {
           <UserHeader
             user={user}
             notifications={notifications}
-            theme={theme}
-            toggleTheme={toggleTheme}
             onLogout={() => console.log("Cerrar sesión")}
             onSettings={() => console.log("Abrir configuración")}
           />

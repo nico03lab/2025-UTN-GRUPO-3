@@ -60,7 +60,7 @@ const padreService = {
         const response = await axios.get(url);
         return response.data;
         } catch (error) {
-        throw error.response?.data || { message: 'Error al obtener asistencias' };
+        throw error.response?.data || { message: 'Error al obtener inasistencias' };
         }
     },
 

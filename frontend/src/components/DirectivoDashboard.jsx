@@ -27,7 +27,6 @@ export default function DirectivoDashboard() {
   const API_BASE_URL = "http://localhost:3002/api";
 
   // 📊 Estados globales
-  const [theme, setTheme] = useState("light");
   const [notifications] = useState(5);
   const [tab, setTab] = useState("");
 
@@ -106,7 +105,6 @@ export default function DirectivoDashboard() {
     setTimeout(() => toast.classList.remove("show"), 3000);
   };
 
-  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
   const updateFilter = (k, v) => setFilters((p) => ({ ...p, [k]: v }));
 
@@ -122,7 +120,7 @@ export default function DirectivoDashboard() {
   // 🧩 RENDER
   // ==============================
   return (
-    <div data-theme={theme} className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-base-200">
       {/* Toast temporal (si lo usas) */}
       <div id="toast" className="toast toast-top toast-end hidden">
         <div className="alert">
@@ -135,8 +133,6 @@ export default function DirectivoDashboard() {
         <UserHeader
           user={user}
           notifications={notifications}
-          theme={theme}
-          toggleTheme={toggleTheme}
         />
 
         {/* ====================== */}
