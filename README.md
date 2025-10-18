@@ -1,55 +1,66 @@
-# 2025-UTN-GRUPO-3
-Proyecto de la materia desarrollo de software, año 2025, comision S-32.
+# Sistema Escolar — 2025 UTN GRUPO 3
 
-## Integrantes: 
-Martinez Yanina Fatima Ester  
-Ciardulo Geraldine  
-Laborde Nicolas  
-Morinigo Roger  
+Proyecto fullstack desarrollado para la materia **Desarrollo de Software**.  
+Incluye un **frontend en React** y un **backend en Node.js + Express + SQLite**, completamente dockerizado para facilitar la ejecución en cualquier entorno.
 
-## Plataforma/Tipo de app: Web
 
-## Lenguajes de Programación:
-Frontend: React  
-Backend: Node.js  
-Base de Datos: SQLite  
-   
-## Idea propuesta:
-Desarrollo de un software de gestión escolar enfocado en una única institución educativa (nivel primario y secundario).
-La plataforma permitirá llevar a cabo las inscripciones y gestión de vacantes de manera organizada y digital, evitando que familias queden sin vacante por problemas administrativos.
-Además, brindará un canal unificado de comunicación entre la escuela y las familias, reemplazando medios dispersos como boletines en papel y cuadernos de notificaciones.
+## Montar el proyecto
 
-## Objetivo principal:
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/nico03lab/2025-UTN-GRUPO-3.git
+cd 2025-UTN-GRUPO-3
+```
 
-Garantizar una gestión eficiente de inscripciones y vacantes dentro de una escuela.
+### 2. Crear el archivo `.env`
+En la raíz del proyecto, crear el archivo `.env` con el siguiente contenido:
+```bash
+DB_PATH=./db/sistema_escolar.db
+PORT=3002
+NODE_ENV=development
+```
 
-Ofrecer a los directivos una herramienta digital que centralice la administración escolar.
+### 3. Construir y levantar los contenedores
+```bash
+docker compose up --build
+```
 
-Modernizar la comunicación con las familias, mejorando la experiencia educativa.
+Este comando:
+- Construye las imágenes del **frontend** y **backend**.  
+- Crea la red interna (`appnet`).  
+- Levanta ambos servicios en paralelo.
 
-## Diferencial:
-Más allá de resolver las inscripciones, el software podrá evolucionar hacia un módulo digital de seguimiento académico y comunicación familia–escuela, sustituyendo el boletín y el cuaderno de comunicaciones tradicionales. Esto posiciona a la institución como moderna e innovadora frente a las familias.
+### 4. Verificar que todo funcione
+- Frontend → [http://localhost:3000](http://localhost:3000)  
+- Backend → [http://localhost:3002](http://localhost:3002)
 
-## Épicas
+---
 
-### Gestión de inscripciones y vacantes
+## Comandos útiles
 
-Registro online de alumnos.
+### Detener la ejecución
+Si estás corriendo en primer plano:
+```bash
+Ctrl + C
+docker compose down
+```
 
-Administración de cupos por nivel (inicial, primario, secundario).
+### Limpiar todo (contenedores, imágenes y volúmenes)
+```bash
+docker compose down --rmi all --volumes
+```
 
-Listas de espera y notificaciones de asignación.
+### Levantar en segundo plano (modo daemon)
+```bash
+docker compose up -d
+```
 
-### Administración institucional de cupos
+Ver contenedores activos:
+```bash
+docker ps
+```
 
-Panel para directivos.
-
-Visualización en tiempo real de la disponibilidad de vacantes.
-
-Reportes de inscripciones y asignaciones.
-
-### Seguimiento académico y comunicación
-
-Acceso de los padres a notas, asistencias y horarios en tiempo real.
-
-Notificaciones sobre reuniones, actividades y novedades.
+Ver logs en tiempo real:
+```bash
+docker compose logs -f
+```

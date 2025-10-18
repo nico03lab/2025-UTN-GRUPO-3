@@ -1,0 +1,23 @@
+# Ignorar dependencias instaladas localmente
+node_modules
+
+# Ignorar la build (no empaquetar producción)
+build
+
+# Archivos de entorno reales
+.env
+
+# Configuración del sistema o IDE
+.git
+.gitignore
+.vscode
+.DS_Store
+
+# Archivos de logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos temporales
+*.swp
+*.swo
