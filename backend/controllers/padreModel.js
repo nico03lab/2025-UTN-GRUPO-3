@@ -3,7 +3,7 @@ const db = require('../db/db');
 const PadreModel = {
   //obtener al tutor
   getTutor: async (padreId) => {
-    console.log('Buscando Tutor para padre ID:', padreId);
+    console.log('Buscando Tutor para padreID:', padreId);
     try{
       const rows = await db.prepare(`
       SELECT 
@@ -38,7 +38,7 @@ const PadreModel = {
         WHERE pe.DNITutor = ?
         ORDER BY e.Nombres
       `).all(padreId);
-      console.log(rows);
+      console.log('Hijos: ',rows);
       return rows;
     } catch (error) {
       throw error;
@@ -67,7 +67,6 @@ const PadreModel = {
         WHERE b.DNIAlumno = ? and a.IdCurso = cm.IdCurso
         ORDER BY m.Nombre
       `).all(estudianteDNI);
-      console.log("Notas: ", rows);
       return rows;
     } catch (error) {
       throw error;
@@ -100,7 +99,6 @@ const PadreModel = {
             END,
           h.HoraInicio
       `).all(estudianteId);
-      console.log("Horarios: ", rows);
       
       return rows;
     } catch (error) {
@@ -124,7 +122,6 @@ const PadreModel = {
         WHERE da.DNIAlumno = ?
         ORDER BY Materia, a.Fecha DESC
       `).all(estudianteId);
-      console.log('Inasistencias', rows);
       return rows;
     } catch (error) {
       throw error;

@@ -17,12 +17,12 @@ const createInscripcion = (req, res) => {
     
     if (!alumno || !alumno.nombre || !alumno.apellido || !alumno.dni || !alumno.fechaNacimiento){
         return res.status(400).json({
-            error: 'Los datos del alumno (nombre, apellido, DNI, FechaNac) son abligatorios'
+            error: 'Los datos del alumno son abligatorios'
         });
     }
     
     if (!tutor || !tutor.dni || !tutor.nombre || !tutor.apellido || !tutor.telefonoCel || !tutor.email){
-        return res.status(400).json({error: 'Debe proporcionar un tutor con datos suficientes(nombre, apellido, DNI, telefonoCel, email)'});
+        return res.status(400).json({error: 'Debe proporcionar un tutor con datos suficientes'});
     }
     if (!curso){
         return res.status(400).json({error: 'Curso solicitado obligatorio'});

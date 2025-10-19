@@ -13,10 +13,16 @@ cd 2025-UTN-GRUPO-3
 ```
 
 ### 2. Crear el archivo `.env`
-En la raíz del proyecto, crear el archivo `.env` con el siguiente contenido:
+En el backend, crear el archivo `.env` con el siguiente contenido:
 ```bash
 DB_PATH=./db/sistema_escolar.db
 PORT=3002
+NODE_ENV=development
+```
+Y en el fronted, crear el archivo .env con el siguiente contenido
+```bash
+REACT_APP_API_URL=http://backend:5000
+PORT=3000
 NODE_ENV=development
 ```
 
