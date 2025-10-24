@@ -52,7 +52,28 @@ const getHorariosDocente = (req, res) => {
   }
 };
 
+const getDocenteMateria = (req, res) => {
+  try {
+    const rows = db.prepare(
+            `SELECT 
+              d.DNIDocente,
+              d.Nombre,
+              d.Apellido,
+              c.Nombre as Materia,
+              d.Email
+              FROM Docentes d 
+              JOIN CursoMateria cm ON cm.DNIDocente = d.DNIDocente
+              JOIN Materias c ON c.IdMateria = cm.IdMateria`
+        )
+      .all();
+    res.json(rows);
+    
+  } catch (error) {
+    console.error("Error al obtener docentes:", error);
+    res.status(500).json({ error: "Error interno al obtener dcoentes" });
+  }
+}
 
 module.exports = {
-  getHorariosDocente, getDocentes
+  getHorariosDocente, getDocentes, getDocenteMateria
 };

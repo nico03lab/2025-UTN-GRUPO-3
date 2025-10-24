@@ -222,13 +222,12 @@ export default function TeacherDashboard() {
                 />
               )}
             </div>
-
-            {/* Footer con información adicional */}
-            <div className="mt-6 bg-base-100 p-4 rounded-box shadow text-center text-sm opacity-70">
-              Sistema de Gestión Escolar • {new Date().getFullYear()} • Cole App
-            </div>
           </main>
         </div>
+        {/* Footer con información adicional */}
+          <div className="mt-6 bg-base-100 p-4 rounded-box shadow text-center text-sm opacity-70">
+            Sistema de Gestión Escolar • {new Date().getFullYear()} • Cole App
+          </div>
       </div>
     </div>
   );

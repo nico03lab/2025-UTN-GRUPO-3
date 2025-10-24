@@ -14,6 +14,8 @@ import AdminCourseList from "../components/AdminCourseList"
 import AdminAttendanceTab from "./AdminAttendanceTab";
 import ReportsTab from "../components/ReportsTab";
 import AlumnosManage from "./AlumnosManage";
+import DocentesManage from "./DocentesManage";
+import { Notebook, Users, SquareUserRound, FileUser } from 'lucide-react';
 
 export default function DirectivoDashboard() {
   const [user] = useState({
@@ -138,34 +140,54 @@ export default function DirectivoDashboard() {
         {/* ====================== */}
         {/* 🧭 Pestañas principales */}
         {/* ====================== */}
-        <div role="tablist" className="tabs tabs-boxed my-6">
+        <div role="tablist" className="tabs tabs-boxed my-6 flex-col sm:flex-row gap-2">
           <button
             role="tab"
-            className={`tab text-sm font-semibold ${mainTab === "cursos" ? "tab-active" : ""}`}
+            className={`tab text-sm font-semibold flex-1 ${
+              mainTab === "cursos" 
+                ? "bg-primary text-primary-content" 
+                : "hover:bg-base-300"
+            }`}
             onClick={() => setMainTab("cursos")}
           >
-            📘 Gestión de Cursos
+            <Notebook size={15} className="mr-1"/> 
+            <span className="hidden sm:inline">Gestión de </span>Cursos
           </button>
           <button
             role="tab"
-            className={`tab text-sm font-semibold ${mainTab === "alumnos" ? "tab-active" : ""}`}
+            className={`tab text-sm font-semibold flex-1 ${
+              mainTab === "alumnos" 
+                ? "bg-primary text-primary-content" 
+                : "hover:bg-base-300"
+            }`}
             onClick={() => setMainTab("alumnos")}
           >
-            🎓 Gestión de Alumnos
+            <Users size={15} className="mr-1"/> 
+            <span className="hidden sm:inline">Gestión de </span>Alumnos
           </button>
           <button
             role="tab"
-            className={`tab text-sm font-semibold ${mainTab === "docentes" ? "tab-active" : ""}`}
+            className={`tab text-sm font-semibold flex-1 ${
+              mainTab === "docentes" 
+                ? "bg-primary text-primary-content" 
+                : "hover:bg-base-300"
+            }`}
             onClick={() => setMainTab("docentes")}
           >
-            👩‍🏫 Gestión de Docentes
+            <SquareUserRound size={15} className="mr-1"/> 
+            <span className="hidden sm:inline">Gestión de </span>Docentes
           </button>
           <button
             role="tab"
-            className={`tab text-sm font-semibold ${mainTab === "inscripciones" ? "tab-active" : ""}`}
+            className={`tab text-sm font-semibold flex-1 ${
+              mainTab === "inscripciones" 
+                ? "bg-primary text-primary-content" 
+                : "hover:bg-base-300"
+            }`}
             onClick={() => setMainTab("inscripciones")}
           >
-            📝 Gestión de Inscripciones
+            <FileUser size={15} className="mr-1"/> 
+            <span className="hidden sm:inline">Gestión de </span>Inscripciones
           </button>
         </div>
 
@@ -214,26 +236,26 @@ export default function DirectivoDashboard() {
         )}
 
         {mainTab === "alumnos" && (
-          <div className="bg-base-100 p-8 rounded-box shadow">
-            <h2 className="text-xl font-semibold mb-3">🎓 Gestión de Alumnos</h2>
+          <div className="bg-base-100 p-4 rounded-box shadow">
             <AlumnosManage/>
           </div>
         )}
 
         {mainTab === "docentes" && (
-          <div className="bg-base-100 p-8 rounded-box shadow">
-            <h2 className="text-xl font-semibold mb-3">👩‍🏫 Gestión de Docentes</h2>
-            <p className="opacity-70">En esta sección se gestionan los docentes, materias asignadas y reportes.</p>
+          <div className="bg-base-100 p-4 rounded-box shadow">
+            <DocentesManage/>
           </div>
         )}
 
         {mainTab === "inscripciones" && (
-          <div className="bg-base-100 p-8 rounded-box shadow">
-            <h2 className="text-xl font-semibold mb-3">📝 Gestión de Inscripciones</h2>
+          <div className="bg-base-100 rounded-box shadow">
             <Solicitudes/>
           </div>
         )}
-      </div>
+        <div className="mt-6 bg-base-100 p-4 rounded-box shadow text-center text-sm opacity-70">
+          Sistema de Gestión Escolar • {new Date().getFullYear()} • Cole App
+        </div>
+      </div> 
     </div>
   );
 }

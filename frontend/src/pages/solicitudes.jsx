@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import SolicitudDashboard from "../components/SolicitudDashboard";
-
+import { ClipboardList } from 'lucide-react';
 export default function Solicitudes() {
   const [inscripciones, setInscripciones] = useState([]);
   const [seleccionada, setSeleccionada] = useState(null);
@@ -56,8 +56,12 @@ export default function Solicitudes() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">📋 Inscripciones</h1>
-
+      <div className="flex items-center mb-4">
+        <ClipboardList size={25} className="mr-1"/> 
+        <h1 className="text-2xl font-bold"> 
+          Inscripciones
+        </h1>
+      </div>
       {/* 🔎 Buscador */}
       <input
         type="text"
@@ -110,8 +114,8 @@ export default function Solicitudes() {
                       i.Estado
                     )} ${
                       seleccionada?.IdInscripcion === i.IdInscripcion
-                        ? "ring ring-primary ring-offset-1"
-                        : ""
+                        ? "bg-primary/20 border-2 border-primary"
+                        : "bg-base-100"
                     }`}
                   >
                     <h3 className="font-semibold text-sm">
