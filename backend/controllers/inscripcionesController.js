@@ -16,9 +16,9 @@ const createInscripcion = (req, res) => {
     } = JSON.parse(req.body.data);
     
     if (!alumno || !alumno.nombre || !alumno.apellido || !alumno.dni || !alumno.fechaNacimiento){
-        return res.status(400).json({
-            error: 'Los datos del alumno son abligatorios'
-        });
+      return res.status(400).json({
+          error: 'Los datos del alumno son abligatorios'
+      });
     }
     
     if (!tutor || !tutor.dni || !tutor.nombre || !tutor.apellido || !tutor.telefonoCel || !tutor.email){
