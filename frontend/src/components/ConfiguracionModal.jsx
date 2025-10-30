@@ -33,9 +33,7 @@ export const ConfiguracionModal = ({
         
         try {
             const response = await axios.get(`${API_BASE_URL}/${apiEndpoint}/${userId}`);
-            
-            console.log('📦 Response completo:', response.data);
-            
+                        
             const responseData = response.data.success ? response.data.data : response.data;
             
             if (responseData.tutor) {
@@ -150,8 +148,6 @@ export const ConfiguracionModal = ({
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {section.fields.map((field) => {
                                                 const fieldValue = datos[field.name] || '';
-                                                
-                                                console.log(`Campo ${field.name}:`, fieldValue);
                                                 
                                                 return (
                                                     <ConfigInputField

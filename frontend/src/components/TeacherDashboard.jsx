@@ -6,8 +6,8 @@ import UserHeader from "../components/UserHeader";
 import CourseSidebar from "../components/CourseSidebar";
 import StatsPanel from "../components/Statspanel";
 import axios from "axios";
-// Asumiendo que tienes un servicio docenteService similar a padreService
-import docenteService from "../ServiceApi.jsx/DocenteService"; // Ajusta la ruta según tu proyecto
+
+import docenteService from "../ServiceApi.jsx/DocenteService";
 
 export default function TeacherDashboard() {
   const [user, setUser] = useState(null);
@@ -119,6 +119,7 @@ export default function TeacherDashboard() {
       .catch((err) => console.error("❌ Error al obtener horarios:", err));
   }, [userLoaded, user?.dni]); 
 
+  // Falta implementación backend con tabla Asistencias
   const saveAttendance = () => {
     const payload = {
       curso: selectedCurso,
@@ -129,11 +130,13 @@ export default function TeacherDashboard() {
       })),
     };
     console.log("Enviar a backend ->", payload);
+    // Mostrar toast
     const toast = document.getElementById("toast");
     toast.classList.add("alert-success", "show");
     setTimeout(() => toast.classList.remove("show"), 3000);
   };
 
+  // Implementar backend con tabla Boletines
   const setGrade = (dni, value) => {
     setGrades((prev) => ({ ...prev, [dni]: { ...prev[dni], nota: value } }));
   };
@@ -145,11 +148,13 @@ export default function TeacherDashboard() {
   const saveGrades = () => {
     const payload = { curso: selectedCurso, calificaciones: grades };
     console.log("Enviar calificaciones ->", payload);
+    // Mostrar toast
     const toast = document.getElementById("toast");
     toast.classList.add("alert-success", "show");
     setTimeout(() => toast.classList.remove("show"), 3000);
   };
 
+  // Estadísticas para la barra lateral
   const stats = {
     totalAlumnos: 78,
     asistenciaPromedio: 92,
