@@ -6,14 +6,12 @@ import UserHeader from "../components/UserHeader";
 import CourseSidebar from "../components/CourseSidebar";
 import StatsPanel from "../components/Statspanel";
 import axios from "axios";
+// Asumiendo que tienes un servicio docenteService similar a padreService
+import docenteService from "../ServiceApi.jsx/DocenteService"; // Ajusta la ruta según tu proyecto
 
 export default function TeacherDashboard() {
-  const [user] = useState({
-    dni: "30111222",
-    id: "doc-001",
-    name: "Prof. Martín López",
-    email: "m.lopez@colegio.edu",
-  });
+  const [user, setUser] = useState(null);
+  const [userLoaded, setUserLoaded] = useState(false); // Estado para controlar si el user está cargado
 
   const API_BASE_URL = "http://localhost:3002/api";
 
@@ -26,7 +24,41 @@ export default function TeacherDashboard() {
   const [grades, setGrades] = useState({});
   const [notifications] = useState(3);
 
+  const idUsuario = "doc-001"; //asumiendo que se parte de un user
+
+
+  const cargarDocente = async () => {
+    try {
+      const response = await docenteService.getDocente(idUsuario); 
+      setUser({
+        dni: response.data.DNIDocente, 
+        userId: response.data.IdUsuario,
+        name: `${response.data.Nombre} ${response.data.Apellido}`,
+        email: response.data.Email,
+      });
+      console.log(' User cargado:', user);
+    } catch (error) {
+      console.error("Error cargando datos del docente/user");
+    } finally {
+      setUserLoaded(true); // Marca como cargado después de intentar cargar
+      checkAllLoaded(); 
+    }
+  };
+
+  // useEffect para cargar el user al montar el componente
   useEffect(() => {
+    cargarDocente();
+  }, []);
+
+  // Función opcional para verificar si todo está cargado (puedes expandirla si tienes más fetches)
+  const checkAllLoaded = () => {
+    if (userLoaded) {
+      console.log("Todos los datos iniciales cargados");
+    }
+  };
+
+  useEffect(() => {
+    if (!userLoaded || !user?.dni) return; // Espera a que user esté cargado el user
     axios
       .get(`${API_BASE_URL}/cursos/${user.dni}`)
       .then((res) => {
@@ -36,10 +68,9 @@ export default function TeacherDashboard() {
           setSelectedCurso(res.data[0].IdCurso);
         }
       })
-      .catch((err) => console.error("❌ Error al obtener cursos:", err));
-  }, [user.dni]);
+      .catch((err) => console.error(" Error al obtener cursos:", err));
+  }, [userLoaded, user?.dni]); // Dependencias actualizadas
 
-  //Funcion para alternar el estado de la asistencia
   const toggleAttendance = (dniAlumno) => {
     setAttendance((prevAttendance) => ({
       ...prevAttendance,
@@ -48,31 +79,28 @@ export default function TeacherDashboard() {
   };
 
   useEffect(() => {
-    if (selectedCurso) {
-      axios
-        .get(`${API_BASE_URL}/alumnos/${selectedCurso}`)
-        .then((res) => {
-          const initAttendance = {};
-          res.data.forEach((a) => (initAttendance[a.DNIAlumno] = false));
-          setAttendance(initAttendance);
-          setAlumnosByCurso(res.data);
-        })
-        .catch((err) => console.error(err));
-    } else {
-      setAlumnosByCurso([]);
-      setAttendance({});
-    }
-  }, [selectedCurso]);
+    if (!userLoaded || !selectedCurso) return; // Espera a que user esté cargado
+    axios
+      .get(`${API_BASE_URL}/alumnos/${selectedCurso}`)
+      .then((res) => {
+        const initAttendance = {};
+        res.data.forEach((a) => (initAttendance[a.DNIAlumno] = false));
+        setAttendance(initAttendance);
+        setAlumnosByCurso(res.data);
+      })
+      .catch((err) => console.error(err));
+  }, [userLoaded, selectedCurso]); // Dependencias actualizadas
 
   const [horarios, setHorarios] = useState({});
 
+  // Modifica este useEffect para depender de userLoaded y user.dni
   useEffect(() => {
+    if (!userLoaded || !user?.dni) return; // Espera a que user esté cargado
     axios
       .get(`${API_BASE_URL}/docentes/horarios/${user.dni}`)
       .then((res) => {
         console.log("✅ Horarios del docente:", res.data);
 
-        // Agrupa por curso (IdCurso)
         const horariosPorCurso = {};
         res.data.forEach((item) => {
           const idCurso = item.IdCurso;
@@ -89,9 +117,8 @@ export default function TeacherDashboard() {
         setHorarios(horariosPorCurso);
       })
       .catch((err) => console.error("❌ Error al obtener horarios:", err));
-  }, [user.dni]);
+  }, [userLoaded, user?.dni]); 
 
-  //Falta implementacion backend con tabla Asistencias
   const saveAttendance = () => {
     const payload = {
       curso: selectedCurso,
@@ -102,13 +129,11 @@ export default function TeacherDashboard() {
       })),
     };
     console.log("Enviar a backend ->", payload);
-    // Mostrar toast
     const toast = document.getElementById("toast");
     toast.classList.add("alert-success", "show");
     setTimeout(() => toast.classList.remove("show"), 3000);
   };
 
-  //Implementar backend con tabla Boletines
   const setGrade = (dni, value) => {
     setGrades((prev) => ({ ...prev, [dni]: { ...prev[dni], nota: value } }));
   };
@@ -120,18 +145,21 @@ export default function TeacherDashboard() {
   const saveGrades = () => {
     const payload = { curso: selectedCurso, calificaciones: grades };
     console.log("Enviar calificaciones ->", payload);
-    // Mostrar toast
     const toast = document.getElementById("toast");
     toast.classList.add("alert-success", "show");
     setTimeout(() => toast.classList.remove("show"), 3000);
   };
 
-  // Estadísticas para la barra lateral
   const stats = {
     totalAlumnos: 78,
     asistenciaPromedio: 92,
     calificacionPromedio: 7.8,
   };
+
+  // Si user no está cargado, muestra un loading (opcional, pero recomendado)
+  if (!userLoaded) {
+    return <div className="min-h-screen bg-base-200 flex items-center justify-center">Cargando datos del docente...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -147,7 +175,9 @@ export default function TeacherDashboard() {
           user={user}
           notifications={notifications}
           onLogout={() => console.log("Cerrar sesión")}
-          onSettings={() => console.log("Abrir configuración")}
+          userRole="Docente"
+          fieldsConfig={DocenteField}
+          apiEndpoint="docentes/configuracion"
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -205,7 +235,7 @@ export default function TeacherDashboard() {
                       viewMode === "cards"
                         ? horarios[selectedCurso] || []
                         : Object.values(horarios).flat()
-                    } 
+                    }
                     viewMode={viewMode}
                   />
                 </div>
@@ -225,10 +255,55 @@ export default function TeacherDashboard() {
           </main>
         </div>
         {/* Footer con información adicional */}
-          <div className="mt-6 bg-base-100 p-4 rounded-box shadow text-center text-sm opacity-70">
-            Sistema de Gestión Escolar • {new Date().getFullYear()} • Cole App
-          </div>
+        <div className="mt-6 bg-base-100 p-4 rounded-box shadow text-center text-sm opacity-70">
+          Sistema de Gestión Escolar • {new Date().getFullYear()} • Cole App
+        </div>
       </div>
     </div>
   );
 }
+
+// Para la modificación
+export const DocenteField = [
+  {
+    section: "Datos Personales",
+    fields: [
+      { name: "DNIDocente", label: "DNI", type: "text", required: true, placeholder: "Ej: 12345678", disabled: true },
+      { name: "Nombre", label: "Nombre", type: "text", required: true, placeholder: "Ej: Juan" },
+      { name: "Apellido", label: "Apellido", type: "text", required: true, placeholder: "Ej: Pérez" },
+      { name: "Email", label: "Email", type: "email", required: true, placeholder: "tutor@email.com" },
+      { name: "TelefonoCel", label: "Teléfono Celular", type: "tel", placeholder: "221-1234567" },
+      { name: "TelefonoLinea", label: "Teléfono Linea", type: "tel", placeholder: "42456789" }
+    ]
+  },
+  {
+    section: "Dirección",
+    fields: [
+      { 
+        name: "Calle", 
+        label: "Calle", 
+        type: "text", 
+        placeholder: "Ej: Calle 50" 
+      },
+      { 
+        name: "Numero", 
+        label: "Número", 
+        type: "text", 
+        placeholder: "Ej: 123" 
+      },
+      { 
+        name: "IdLocalidad", 
+        label: "Provincia y Localidad", 
+        type: "localidad", // Tipo especial
+        className: "md:col-span-2" // Ocupa 2 columnas
+      },
+    ]
+  },
+  {
+    section: "Usuario",
+    fields: [
+      { name: "NombreUsuario", label: "Usuario", type: "text", placeholder: "Ej: juanPerez" },
+      { name: "Pass", label: "Contraseña", type: "text", placeholder: "Ej: doc-001" },
+    ]
+  }
+];

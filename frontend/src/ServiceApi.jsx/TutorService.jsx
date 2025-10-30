@@ -4,9 +4,9 @@ const API_URL = 'http://localhost:3002/api/alumnos';
 
 const padreService = {
     //obtener al tutor
-    getTutor: async (padreId) => {
+    getTutor: async (idUsuario) => {
         try{
-            const response = await axios.get(`${API_URL}/tutor/${padreId}`);
+            const response = await axios.get(`${API_URL}/tutor/${idUsuario}`);
             return response.data;
         }catch (error){
             throw error.response?.data || {message: 'Error al obtener al tutor'};

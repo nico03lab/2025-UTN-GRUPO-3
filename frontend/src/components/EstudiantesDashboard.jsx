@@ -5,7 +5,7 @@ import { StudentGrade } from "./StudentGrade";
 import CalendarTab from "./CalendarTab";
 import { useEffect, useState } from "react";
 import MailboxTab from "./MailBoxTab";
-import padreService from "./TutorService";
+import padreService from "../ServiceApi.jsx/TutorService";
 import AbsencesStudentTab from "./AbsencesStudentTab";
 
 export const EstudiantesDashboard = () => {
@@ -13,7 +13,7 @@ export const EstudiantesDashboard = () => {
   const [userLoaded, setUserLoaded] = useState(false); // Nuevo estado para verificar si user está cargado
   const [hijosLoaded, setHijosLoaded] = useState(false); // Estado para hijos, si es necesario
 
-  const PADRE_ID = 25000000; // Hardcodeado por ahora, después viene del login, es el dni
+  const idUsuario = "tut-001"; // Hardcodeado por ahora, después viene del login, es el dni
 
   const [user, setUser] = useState({});
   const [estudiantes, setEstudiantes] = useState([]);
@@ -29,13 +29,15 @@ export const EstudiantesDashboard = () => {
   }, []);
   const cargarTutor = async () => {
     try {
-      const response = await padreService.getTutor(PADRE_ID);
+      const response = await padreService.getTutor(idUsuario);
       setUser({
         name: `${response.data.Nombre} ${response.data.Apellido}`,
         email: response.data.Email,
         userId: response.data.IdUsuario,
+        dni: response.data.DNITutor
       });
-    } catch (err) {
+      console.log('👤 User cargado:', user);
+    } catch (error) {
       console.error("Error cargando datos del tutor/user");
     } finally {
       setUserLoaded(true); // Marca como cargado después de intentar cargar
@@ -44,12 +46,17 @@ export const EstudiantesDashboard = () => {
   };
 
   useEffect(() => {
-    cargarHijos();
-  }, []);
+    if (userLoaded && user.dni) {
+      console.log('Cargando hijos para DNI:', user.dni);
+      cargarHijos();
+    }
+  }, [userLoaded, user.dni]);
 
   const cargarHijos = async () => {
     try {
-      const response = await padreService.getHijos(PADRE_ID);
+      console.log(user);
+      console.log("Dni del user; ", user.dni);
+      const response = await padreService.getHijos(user.dni);
 
       if (Array.isArray(response.data)) {
         // Si response.data es un array, mapea cada elemento para agregar propiedades
@@ -279,7 +286,10 @@ export const EstudiantesDashboard = () => {
           <UserHeader
             user={user}
             onLogout={() => console.log("Cerrar sesión")}
-            onSettings={() => console.log("Abrir configuración")}
+            //props para configuracion
+            userRole = "Tutor"
+            fieldsConfig={TutorField}
+            apiEndpoint="alumnos/tutor/configuracion"
           />
         ) : (
           <div className="bg-base-100 p-4 rounded-box shadow text-center">
@@ -322,3 +332,52 @@ export const EstudiantesDashboard = () => {
     </div>
   );
 };
+export const TutorField = [
+  {
+    section: "Datos Personales",
+    fields: [
+      { name: "DNITutor", label: "DNI", type: "text", required: true, placeholder: "Ej: 12345678", disabled: true },
+      { name: "Nombre", label: "Nombre", type: "text", required: true, placeholder: "Ej: Juan" },
+      { name: "Apellido", label: "Apellido", type: "text", required: true, placeholder: "Ej: Pérez" },
+      { name: "Email", label: "Email", type: "email", required: true, placeholder: "tutor@email.com" },
+      { name: "TelefonoCel", label: "Teléfono Celular", type: "tel", placeholder: "221-1234567" },
+      { name: "TelefonoLinea", label: "Teléfono Linea", type: "tel", placeholder: "42456789" }
+    ]
+  },
+  {
+    section: "Dirección",
+    fields: [
+      { 
+        name: "Calle", 
+        label: "Calle", 
+        type: "text", 
+        placeholder: "Ej: Calle 50" 
+      },
+      { 
+        name: "Numero", 
+        label: "Número", 
+        type: "text", 
+        placeholder: "Ej: 123" 
+      },
+      { 
+        name: "IdLocalidad", 
+        label: "Provincia y Localidad", 
+        type: "localidad", // Tipo especial
+        className: "md:col-span-2" // Ocupa 2 columnas
+      },
+    ]
+  },
+  {
+    section: "Usuario",
+    fields: [
+      { name: "NombreUsuario", label: "Usuario", type: "text", placeholder: "Ej: juanPerez" },
+      { name: "Pass", label: "Contraseña", type: "text", placeholder: "Ej: doc-001" },
+    ]
+  },
+  {
+    section: "Información de Hijos",
+    fields: [
+      { name: "hijos", label: "Hijos matriculados", type: "custom", component: "HijosLista" },
+    ]
+  }
+];

@@ -2,6 +2,32 @@ const db = require("../db/db");
 const { createUsuarioInterno } = require('./usersController');
 const { getLocalidadByNombre, createLocalidad } = require("./localidadController");
 
+const getDocenteUser = async (req, res) => {
+    try{
+      const {idUsuario} = req.params; // Si viene del token o del parámetro
+      const docente = await db.prepare(`
+          SELECT 
+              Nombre,
+              Apellido,
+              Email,
+              DNIDocente,
+              IdUsuario
+          FROM Docentes 
+          WHERE IdUsuario = ?
+          `).get(idUsuario);
+      console.log ("Datos", docente)
+      res.json({
+          success: true,
+          data: docente
+      });
+    } catch (error) {
+    console.error('Error obteniendo al docente:', error);
+    res.status(500).json({
+        success: false,
+        message: 'Error al obtener al docente'
+    });
+    }
+}
 const getDocentes = async () => {
     try {
         const rows = db.prepare(
@@ -162,7 +188,118 @@ const asociarCursoMateria = (req, res) => {
   res.status(500).json({ error: 'Error al actualizar docente' });
  }
 }
+const docenteConfig = {
+//obtener datos para la modificacion
+    getDocenteCompleto: async (req,res) => {
+        try{
+        const {idUsuario} = req.params; // Si viene del token o del parámetro
+        console.log("Cargando docente para la modificaion: ", idUsuario);
+        const docente = await db.prepare(`
+            SELECT 
+            d.DNIDocente,
+              d.Apellido,
+              d.Nombre,
+              d.Calle,
+              d.Numero,
+              d.IdLocalidad,
+              l.Nombre as Localidad,
+              l.Provincia, 
+              d.TelefonoCel, 
+              d.TelefonoLinea,
+              d.Email,
+              u.NombreUsuario,
+              u.Pass
+            FROM Docentes d 
+            LEFT JOIN Localidades l ON d.IdLocalidad = l.IdLocalidad
+            JOIN Usuarios u ON d.IdUsuario = u.IdUsuario
+            WHERE d.IdUsuario = ? 
+            `).get(idUsuario);
+        console.log ("Datos", docente)
+        res.json({
+            success: true,
+            data: docente
+        });
+        } catch (error) {
+        console.error('Error obteniendo al directivo:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener al directivo'
+        });
+        }
+    },
 
+    updateDocente: async (req, res) => {
+        try {
+            const { idUsuario } = req.params;
+            console.log("Actualizar docente: ", idUsuario);
+            const { 
+                Apellido, 
+                Nombre, 
+                Email, 
+                TelefonoCel, 
+                TelefonoLinea, 
+                Calle, 
+                Numero,
+                IdLocalidad,
+                NombreUsuario,
+                Pass 
+            } = req.body;
+
+            const stmt = db.prepare(`
+                UPDATE Docentes
+                SET Apellido = ?,
+                    Nombre = ?,
+                    Email = ?,
+                    TelefonoCel = ?,
+                    TelefonoLinea = ?,
+                    Calle = ?,
+                    Numero = ?,
+                    IdLocalidad = ?
+                WHERE IdUsuario = ?
+            `);
+
+            const result = stmt.run(
+                Apellido,
+                Nombre,
+                Email,
+                TelefonoCel,
+                TelefonoLinea,
+                Calle,
+                Numero,
+                IdLocalidad,
+                idUsuario
+            );
+
+            // Si se proporciona una nueva contraseña, actualizarla
+            if (Pass || NombreUsuario) {
+                const updatePassStmt = db.prepare(`
+                    UPDATE Usuarios 
+                    SET Pass = ? , NombreUsuario = ?
+                    WHERE IdUsuario = ?
+                `);
+                updatePassStmt.run(Pass, NombreUsuario, idUsuario);
+            }
+
+            if (result.changes === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Docente no encontrado'
+                });
+            }
+
+            res.json({
+                success: true,
+                message: 'Docente actualizado correctamente'
+            });
+        } catch (error) {
+            console.error('Error actualizando Docente:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al actualizar Docente'
+            });
+        }
+    }
+}
 module.exports = {
-  getHorariosDocente, getDocentes, getDocenteMateria, agregarNuevoDocente, asociarCursoMateria
+  getHorariosDocente, getDocentes, getDocenteMateria, getDocenteUser, agregarNuevoDocente, asociarCursoMateria, docenteConfig
 };
