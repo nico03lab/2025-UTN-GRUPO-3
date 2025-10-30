@@ -5,11 +5,12 @@ import axios from "axios";
 import UserHeader from "../components/UserHeader";
 import StatsPanel from "../components/Statspanel";
 import Solicitudes from "../pages/solicitudes";
+import directivoService from "../ServiceApi.jsx/DirectivoService";
 
 // 🧩 Tabs (cada uno modular)
 import InscriptionsTab from "../components/InscriptionTab";
 import TransferTab from "../components/StudentTransferTab";
-import AdminCourseSidebar from "../components/AdminCourseSidebar";
+import AdminCourseSidebar from "../components/AdminCourseSidebar"; 
 import AdminCourseList from "../components/AdminCourseList"
 import AdminAttendanceTab from "./AdminAttendanceTab";
 import ReportsTab from "../components/ReportsTab";
@@ -17,16 +18,44 @@ import AlumnosManage from "./AlumnosManage";
 import DocentesManage from "./DocentesManage";
 import { Notebook, Users, SquareUserRound, FileUser } from 'lucide-react';
 
+
+
+
+
 export default function DirectivoDashboard() {
-  const [user] = useState({
+  const [useri] = useState({
     dni: "20111222",
-    id: "admin-001",
+    userId: "admin-001",
     name: "Lic. Ana García",
     email: "a.garcia@colegio.edu",
     role: "Directora",
   });
+  const [user, setUser] = useState({});
+  const [userLoaded, setUserLoaded] = useState(false); // Nuevo estado para verificar si user está cargado
+
+
 
   const API_BASE_URL = "http://localhost:3002/api";
+  const idUsuario = "dir-001"; // Hardcodeado por ahora, después viene del login
+
+  useEffect(() => {
+    cargarDirectivo();
+  }, []);
+  const cargarDirectivo = async () => {
+    try {
+      const response = await directivoService.getDirectivo(idUsuario);
+      setUser({
+        dni: response.data.DNIDirectivo,
+        name: `${response.data.Nombre} ${response.data.Apellido}`,
+        email: response.data.Email,
+        userId: response.data.IdUsuario,
+      });
+    } catch (err) {
+      console.error("Error cargando datos del tutor/user");
+    } finally {
+      setUserLoaded(true); // Marca como cargado después de intentar cargar
+    }
+  };
 
   // 📊 Estados globales
   const [notifications] = useState(5);
@@ -135,6 +164,10 @@ export default function DirectivoDashboard() {
         <UserHeader
           user={user}
           notifications={notifications}
+          //props para configuracion
+          userRole = "Directivo"
+          fieldsConfig={DirectivoField}
+          apiEndpoint="directivos/configuracion"
         />
 
         {/* ====================== */}
@@ -259,3 +292,50 @@ export default function DirectivoDashboard() {
     </div>
   );
 }
+
+
+//para la modificacion
+export const DirectivoField = [
+  {
+    section: "Datos Personales",
+    fields: [
+      { name: "DNIDirectivo", label: "DNI", type: "text", required: true, placeholder: "Ej: 12345678", disabled: true },
+      { name: "Cargo", label: "Cargo", type: "text", required: true, placeholder: "Ej: Director" },
+      { name: "Nombre", label: "Nombre", type: "text", required: true, placeholder: "Ej: Juan" },
+      { name: "Apellido", label: "Apellido", type: "text", required: true, placeholder: "Ej: Pérez" },
+      { name: "Email", label: "Email", type: "email", required: true, placeholder: "tutor@email.com" },
+      { name: "TelefonoCel", label: "Teléfono Celular", type: "tel", placeholder: "221-1234567" },
+      { name: "TelefonoLinea", label: "Teléfono Linea", type: "tel", placeholder: "42456789" }
+    ]
+  },
+  {
+    section: "Dirección",
+    fields: [
+      { 
+        name: "Calle", 
+        label: "Calle", 
+        type: "text", 
+        placeholder: "Ej: Calle 50" 
+      },
+      { 
+        name: "Numero", 
+        label: "Número", 
+        type: "text", 
+        placeholder: "Ej: 123" 
+      },
+      { 
+        name: "IdLocalidad", 
+        label: "Provincia y Localidad", 
+        type: "localidad", // Tipo especial
+        className: "md:col-span-2" // Ocupa 2 columnas
+      },
+    ]
+  },
+  {
+    section: "Usuario",
+    fields: [
+      { name: "NombreUsuario", label: "Usuario", type: "text", placeholder: "Ej: juanPerez" },
+      { name: "Pass", label: "Contraseña", type: "text", placeholder: "Ej: doc-001" },
+    ]
+  }
+];

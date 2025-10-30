@@ -2,18 +2,19 @@ const db = require('../db/db');
 
 const PadreModel = {
   //obtener al tutor
-  getTutor: async (padreId) => {
-    console.log('Buscando Tutor para padreID:', padreId);
+  getTutor: async (idUsuario) => {
+    console.log('Buscando Tutor para padre con User:', idUsuario);
     try{
       const rows = await db.prepare(`
       SELECT 
         Nombre,
         Apellido,
         Email,
+        DNITutor,
         IdUsuario
       FROM Tutores 
-      WHERE DNITutor = ?
-      `).get(padreId);
+      WHERE idUsuario = ?
+      `).get(idUsuario);
       console.log ("Datos", rows)
      return rows;
     } catch (error) {
@@ -21,6 +22,61 @@ const PadreModel = {
     }
   },
   
+  //Obtener todos los datos del tutor y de sus hijos vinculados para la modificaion
+  getTutorCompleto: async (idUsuario) => {
+    console.log('Buscando Tutor Completo para padreID:', idUsuario);
+    try{
+      const tutor = await db.prepare(`
+      SELECT 
+        t.DNITutor,
+        t.Apellido,
+        t.Nombre,
+        t.Calle,
+        t.Numero,
+        t.IdLocalidad,
+        l.Nombre as Localidad,
+        l.Provincia, 
+        t.TelefonoCel,
+        t.TelefonoLinea,
+        t.Email,
+        u.NombreUsuario,
+        u.Pass
+      FROM Tutores t 
+      JOIN Localidades l ON t.IdLocalidad = l.IdLocalidad
+      JOIN Usuarios u ON t.IdUsuario = u.IdUsuario
+      WHERE t.IdUsuario = ?
+      `).get(idUsuario);
+      console.log ("Datos", tutor);
+      if(!tutor){
+        throw new Error('Tutor no encontrado');
+      }
+      const hijos = db.prepare(`
+        SELECT
+          a.DNIAlumno, 
+          a.Apellido,
+          a.Nombres, 
+          a.Calle,
+          a.Numero,
+          a.IdLocalidad,
+          l.Nombre as Localidad,
+          l.Provincia,
+          a.Telefono,
+          a.Email, 
+          a.Estado,
+          a.FechaNacimiento,
+          at.Relacion
+        FROM AlumnoTutor at
+        JOIN Alumnos a ON at.DNIAlumno = a.DNIAlumno
+        LEFT JOIN Localidades l ON l.IdLocalidad = a.IdLocalidad
+        WHERE at.DNITutor = ?
+        `).all(tutor.DNITutor);
+      console.log("Hijos encontrados:", hijos);
+      return {tutor, hijos};
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Obtener todos los hijos de un padre
   getHijos: async (padreId) => {
     try {

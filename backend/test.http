@@ -1,2 +1,9 @@
+
+### 
+GET http://localhost:3002/api/cursos/disponibles
+
 ###
-GET http://localhost:3002/api/docentes/materias
+GET http://localhost:3002/api/directivos/dir-001
+
+###
+GET http://localhost:3002/api/alumnos/tutor/25000000/hijos

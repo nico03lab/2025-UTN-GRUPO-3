@@ -44,4 +44,25 @@ const getCursos = (req, res) => {
   }
 };
 
-module.exports = { getCursosPorProfe , getCursoByNivelYTurno, getCursos};
+const getCursosDisponibles= (req,res) =>{
+  try {
+    const cursos = db.prepare(`
+      SELECT 
+        c.IdCurso,
+        e.Nombre as Especialidad,
+        c.Turno,
+        m.Nombre as Materia, 
+        m.IdMateria
+        FROM Cursos c 
+        JOIN CursoMateria cm ON c.IdCurso = cm.IdCurso 
+        JOIN Especialidades e ON e.IdEspecialidad = c.IdEspecialidad
+        JOIN Materias m ON m.IdMateria = cm.IdMateria
+        WHERE cm.DNIDocente IS NULL`).all();
+    console.log(cursos);
+    res.json(cursos);
+  } catch (error) {
+    console.error("❌ Error en obtener cursos-materias disponibles:", err.message);
+    res.status(500).json({ error: error.message });
+  }
+}
+module.exports = { getCursosPorProfe , getCursoByNivelYTurno, getCursos, getCursosDisponibles};

@@ -41,8 +41,15 @@ const createUsuario = (req, res) => {
   }
 };
 
+const createUsuarioInterno = (idUsuario, nombreUsuario, pass, tipo) =>{
+  const sql = `INSERT INTO Usuarios (IdUsuario, NombreUsuario, Pass, Tipo)
+                VALUES (?, ?, ?, ?)`;
+  db.prepare(sql).run(idUsuario, nombreUsuario, pass, tipo); 
+}
+
 module.exports = {
   getUsuarios,
   getUsuarioById,
   createUsuario,
+  createUsuarioInterno
 };

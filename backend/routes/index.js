@@ -10,6 +10,8 @@ router.use('/documentos', require('./documentosRoutes'));
 router.use('/eventos', require('./eventosRoutes'));
 router.use('/notificaciones', require('./notificacionesRoutes'));
 router.use('/usuarios', require('./usersRoutes'));
+router.use('/localidades', require('./localidadesRoutes'));
+router.use('/directivos', require('./directivosRouter'));
 //router.use('/mensajes', require('./mensajesRoutes'));
 //router.use('/difusion', require('./difusionRoutes'));
 

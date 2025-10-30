@@ -8,11 +8,16 @@ import {
 } from "@heroicons/react/24/outline";
 import { useTheme } from "./ThemeContext";
 import ThemeToggle from "./ThemeToggle";
+import { ConfiguracionModal } from './ConfiguracionModal';
+
 
 export default function UserHeader({
   user,
   onLogout,
-  onSettings,
+  // Nuevas props para configuración
+  userRole,
+  fieldsConfig,
+  apiEndpoint,
 }) {
   const { theme } = useTheme();
   const [notifications, setNotifications] = useState([]);
@@ -50,15 +55,12 @@ export default function UserHeader({
   }, []);
 
   // Marcar como leída
-
   const marcarLeida = async (idNotificacion) => {
     try {
-      // Llamada al backend
       await axios.put(
         `http://localhost:3002/api/notificaciones/${idNotificacion}/leida/${user.userId}`
       );
 
-      // Actualizar estado local (para feedback inmediato)
       setNotifications((prev) =>
         prev.map((n) =>
           n.IdNotificacion === idNotificacion ? { ...n, Leida: 1 } : n
@@ -158,7 +160,6 @@ export default function UserHeader({
                           })}
                         </p>
 
-                        {/* Etiqueta “Leída” */}
                         {isLeida && (
                           <span className="absolute bottom-1 right-3 text-[10px] italic text-green-600 opacity-70">
                             Leída
@@ -166,7 +167,6 @@ export default function UserHeader({
                         )}
                       </div>
 
-                      {/* Botón de tilde */}
                       {!isLeida && (
                         <button
                           onClick={(e) => {
@@ -189,14 +189,23 @@ export default function UserHeader({
 
         <ThemeToggle />
 
-        {/* Configuración */}
-        <button
-          type="button"
-          className="btn btn-ghost btn-circle"
-          onClick={onSettings}
-        >
-          <CogIcon className="h-6 w-6" />
-        </button>
+        {/* Configuración - Ahora con modal */}
+        {userRole && fieldsConfig && apiEndpoint ? (
+          <ConfiguracionModal
+            userRole={userRole}
+            userId={user.userId}
+            fieldsConfig={fieldsConfig}
+            apiEndpoint={apiEndpoint}
+          />
+        ) : (
+          <button
+            type="button"
+            className="btn btn-ghost btn-circle"
+            onClick={() => console.log("Sin configuración disponible")}
+          >
+            <CogIcon className="h-6 w-6" />
+          </button>
+        )}
 
         {/* Logout */}
         <button
