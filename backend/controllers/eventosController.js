@@ -120,7 +120,6 @@ const getEventosPorAlumno = (req, res) => {
   }
 };
 
-
 const createEvento = (req, res) => {
   const {
     titulo,
@@ -140,7 +139,7 @@ const createEvento = (req, res) => {
 
   try {
     const trx = db.transaction(() => {
-      // 1️⃣ Insertar el evento
+      // Insertar el evento
       const info = stmts.insertEvento.run(
         titulo,
         descripcion || "",
@@ -152,7 +151,7 @@ const createEvento = (req, res) => {
       );
       const idEvento = info.lastInsertRowid;
 
-      // 2️⃣ Crear la notificación base
+      // Crear la notificación base
       const mensajeBase =
         alcance === "Global"
           ? `Nuevo evento institucional: ${titulo}`
@@ -163,7 +162,7 @@ const createEvento = (req, res) => {
       const notif = stmts.insertNotificacion.run(mensajeBase, idEvento);
       const idNotificacion = notif.lastInsertRowid;
 
-      // 3️⃣ Asociar usuarios según el alcance
+      // Asociar usuarios según el alcance
       if (alcance === "Curso" && Array.isArray(cursos) && cursos.length) {
         for (const idCurso of cursos) {
           // Asociación curso-evento
@@ -195,7 +194,6 @@ const createEvento = (req, res) => {
           stmts.insertEventoUsuario.run(idEvento, idUsuario);
           stmts.insertNotificacionUsuario.run(idNotificacion, idUsuario, 0);
 
-          // 🔹 También los tutores de ese alumno
           const tutores = db
             .prepare(`
               SELECT t.IdUsuario

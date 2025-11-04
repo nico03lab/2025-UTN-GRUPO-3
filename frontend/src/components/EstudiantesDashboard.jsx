@@ -5,7 +5,7 @@ import { StudentGrade } from "./StudentGrade";
 import CalendarTab from "./CalendarTab";
 import { useEffect, useState } from "react";
 import MailboxTab from "./MailBoxTab";
-import padreService from "../ServiceApi.jsx/TutorService";
+import padreService from "../services/TutorService";
 import AbsencesStudentTab from "./AbsencesStudentTab";
 
 export const EstudiantesDashboard = () => {
