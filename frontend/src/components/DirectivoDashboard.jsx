@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-// 🧩 Componentes comunes
+// Componentes comunes
 import UserHeader from "../components/UserHeader";
 import StatsPanel from "../components/Statspanel";
 import Solicitudes from "../pages/solicitudes";
-import directivoService from "../ServiceApi.jsx/DirectivoService";
+import directivoService from "../services/DirectivoService";
 
-// 🧩 Tabs (cada uno modular)
+// Tabs (cada uno modular)
 import InscriptionsTab from "../components/InscriptionTab";
 import TransferTab from "../components/StudentTransferTab";
 import AdminCourseSidebar from "../components/AdminCourseSidebar"; 
@@ -17,10 +17,6 @@ import ReportsTab from "../components/ReportsTab";
 import AlumnosManage from "./AlumnosManage";
 import DocentesManage from "./DocentesManage";
 import { Notebook, Users, SquareUserRound, FileUser } from 'lucide-react';
-
-
-
-
 
 export default function DirectivoDashboard() {
   const [useri] = useState({

@@ -12,6 +12,8 @@ router.use('/notificaciones', require('./notificacionesRoutes'));
 router.use('/usuarios', require('./usersRoutes'));
 router.use('/localidades', require('./localidadesRoutes'));
 router.use('/directivos', require('./directivosRouter'));
+router.use('/asistencias', require('./asistenciasRoutes'));
+ 
 //router.use('/mensajes', require('./mensajesRoutes'));
 //router.use('/difusion', require('./difusionRoutes'));
 

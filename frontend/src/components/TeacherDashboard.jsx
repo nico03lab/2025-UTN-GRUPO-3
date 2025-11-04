@@ -5,9 +5,9 @@ import GradesTab from "./GradesTab";
 import UserHeader from "../components/UserHeader";
 import CourseSidebar from "../components/CourseSidebar";
 import StatsPanel from "../components/Statspanel";
-import axios from "axios";
+import axios from "../services/axios";
 
-import docenteService from "../ServiceApi.jsx/DocenteService";
+import docenteService from "../services/DocenteService";
 
 export default function TeacherDashboard() {
   const [user, setUser] = useState(null);
@@ -25,7 +25,6 @@ export default function TeacherDashboard() {
   const [notifications] = useState(3);
 
   const idUsuario = "doc-001"; //asumiendo que se parte de un user
-
 
   const cargarDocente = async () => {
     try {
