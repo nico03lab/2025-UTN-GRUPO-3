@@ -37,6 +37,12 @@ function App() {
           <Route path="/alumnos" element={<AlumnosPage />}></Route>
           <Route path="/directivos" element={<DirectivoDashboard />}></Route>
         </Routes>
+        {/* 🔔 Global Toast visible para toda la app */}
+        <div id="toast" className="toast toast-top toast-end hidden z-50">
+          <div id="toast-alert" className="alert">
+            <span id="toast-msg">Mensaje</span>
+          </div>
+        </div>
       </ThemeProvider>
     </AuthProvider>
   );

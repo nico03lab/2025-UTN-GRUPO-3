@@ -1,12 +1,12 @@
 const db = require("../db/db");
 
 const createAsistencia = (req, res) => {
-  const { curso, fecha, materia, asistencia } = req.body;
+  const { curso, fecha, idMateria, asistencia } = req.body;
 
   try {
-    console.log("📥 Datos recibidos desde frontend:", req.body);
+    console.log("Datos recibidos desde frontend:", req.body);
 
-    if (!curso || !fecha || !materia || !Array.isArray(asistencia)) {
+    if (!curso || !fecha || !idMateria || !Array.isArray(asistencia)) {
       return res.status(400).json({ error: "Faltan datos obligatorios en el cuerpo de la solicitud." });
     }
 
@@ -16,7 +16,7 @@ const createAsistencia = (req, res) => {
         FROM Asistencias 
         WHERE IdCurso = ? AND IdMateria = ? AND Fecha = ?
       `)
-      .get(curso, materia, fecha);
+      .get(curso, idMateria, fecha);
 
     if (existe.count > 0) {
       return res
@@ -29,7 +29,7 @@ const createAsistencia = (req, res) => {
       VALUES (?, ?, ?, NULL)
     `);
 
-    const result = insertAsistencia.run(curso, fecha, materia);
+    const result = insertAsistencia.run(curso, fecha, idMateria);
     const idAsistencia = result.lastInsertRowid;
 
     const stmtDetalle = db.prepare(`

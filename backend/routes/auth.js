@@ -11,7 +11,6 @@ const db = new Database(path.join(__dirname, "../db/sistema_escolar.db"));
 const router = express.Router();
 
 // Helpers
-
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const JWT_ACCESS_TTL = process.env.JWT_ACCESS_TTL || "15m";
@@ -128,5 +127,4 @@ router.get("/me", authenticateJWT, (req, res) => {
   res.json({ user: req.user });
 });
 
-// Exportar
 module.exports = router;

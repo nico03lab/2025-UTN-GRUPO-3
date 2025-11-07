@@ -15,7 +15,7 @@ export const TutoresPage = () => {
     const fetchUser = async () => {
       try {
         // ID temporal hasta implementar login real
-        const loggedUserId = "tut-001";
+        const loggedUserId = "tut-003";
 
         const res = await axios.get(
           `http://localhost:3002/api/usuarios/${loggedUserId}`
@@ -44,179 +44,11 @@ export const TutoresPage = () => {
     document.documentElement.setAttribute("data-theme", newTheme);
   };
 
-  const [estudiantes] = useState([
-    {
-      IdEstudiante: 1,
-      Nivel: "Secundaria",
-      Grado: "1º A",
-      Nombre: "Juan",
-      Apellido: "Perez",
-      color: "primary",
-      dni: "1234",
-    },
-    {
-      IdEstudiante: 2,
-      Nivel: "Primaria",
-      Grado: "2º B",
-      Nombre: "Maria",
-      Apellido: "Perez",
-      color: "secondary",
-      dni: "5678",
-    },
-  ]);
-
-  const horarios = {
-    1: [
-      { dia: "Lunes", hora: "08:00 - 09:30", aula: "A101" },
-      { dia: "Miércoles", hora: "10:00 - 11:30", aula: "A101" },
-    ],
-    2: [
-      { dia: "Martes", hora: "09:00 - 10:30", aula: "B201" },
-      { dia: "Jueves", hora: "11:00 - 12:30", aula: "B201" },
-    ],
-  };
-
-  // Datos de ejemplo para eventos del calendario
-  const eventosPorEstudiante = {
-    1: [
-      {
-        id: 1,
-        title: "Examen de Historia",
-        start: new Date(new Date().setDate(new Date().getDate() + 1)),
-        end: new Date(new Date().setDate(new Date().getDate() + 1)),
-        extendedProps: {
-          materia: "Historia",
-          tipo: "examen",
-          descripcion: "Examen parcial del primer trimestre",
-        },
-        color: "#ef4444",
-      },
-      {
-        id: 2,
-        title: "Entrega de Proyecto - Química",
-        start: new Date(new Date().setDate(new Date().getDate() + 3)),
-        end: new Date(new Date().setDate(new Date().getDate() + 3)),
-        extendedProps: {
-          materia: "Química",
-          tipo: "entrega",
-          descripcion: "Proyecto de laboratorio",
-        },
-        color: "#3b82f6",
-      },
-      {
-        id: 3,
-        title: "Clase Extra - Biología",
-        start: new Date(new Date().setDate(new Date().getDate() + 5)),
-        end: new Date(new Date().setDate(new Date().getDate() + 5)),
-        extendedProps: {
-          materia: "Biología",
-          tipo: "clase",
-          descripcion: "Clase de repaso",
-        },
-        color: "#10b981",
-      },
-    ],
-    2: [
-      {
-        id: 4,
-        title: "Examen de Matemática",
-        start: new Date(new Date().setDate(new Date().getDate() + 2)),
-        end: new Date(new Date().setDate(new Date().getDate() + 2)),
-        extendedProps: {
-          materia: "Matemática",
-          tipo: "examen",
-          descripcion: "Examen de geometría",
-        },
-        color: "#ef4444",
-      },
-      {
-        id: 5,
-        title: "Olimpíada de Física",
-        start: new Date(new Date().setDate(new Date().getDate() + 6)),
-        end: new Date(new Date().setDate(new Date().getDate() + 6)),
-        extendedProps: {
-          materia: "Física",
-          tipo: "evento",
-          descripcion: "Competencia escolar",
-        },
-        color: "#8b5cf6",
-      },
-      {
-        id: 6,
-        title: "Reunión de Padres",
-        start: new Date(new Date().setDate(new Date().getDate() + 8)),
-        end: new Date(new Date().setDate(new Date().getDate() + 8)),
-        extendedProps: {
-          materia: "General",
-          tipo: "reunion",
-          descripcion: "Reunión informativa",
-        },
-        color: "#f59e0b",
-      },
-    ],
-  };
-
-  const [selectedEstudiante, setSelectedEstudiante] = useState(
+   const [selectedEstudiante, setSelectedEstudiante] = useState(
     estudiantes[0].IdEstudiante
   );
   const [tab, setTab] = useState("schedules");
   const [subjectsByStudent, setSubjectsByStudent] = useState({});
-
-  useEffect(() => {
-    setSubjectsByStudent({
-      1: [
-        {
-          IdMateria: "1",
-          Materia: "Historia",
-          Docente: "Lucas Perez",
-          Nota: "10",
-          Obs: "Destacado",
-        },
-        {
-          IdMateria: "2",
-          Materia: "Quimica",
-          Docente: "Martin Lopez",
-          Nota: "9",
-          Obs: "Muy Bueno",
-        },
-        {
-          IdMateria: "3",
-          Materia: "Biologia",
-          Docente: "Ana Martinez",
-          Nota: "5",
-        },
-      ],
-      2: [
-        {
-          IdMateria: "4",
-          Materia: "Historia",
-          Docente: "Lucas Perez",
-          Nota: "10",
-          Obs: "Destacado",
-        },
-        {
-          IdMateria: "5",
-          Materia: "Matematica",
-          Docente: "Martin Lopez",
-          Nota: "10",
-          Obs: "Destacado",
-        },
-        {
-          IdMateria: "6",
-          Materia: "Fisica",
-          Docente: "Ana Martinez",
-          Nota: "10",
-          Obs: "Destacado",
-        },
-      ],
-    });
-  }, []);
-
-  useEffect(() => {
-    const list = subjectsByStudent[selectedEstudiante] || [];
-    const init = {};
-    list.forEach((a) => (init[a.IdMateria] = false));
-  }, [selectedEstudiante, subjectsByStudent]);
 
   if (!user) {
     return (

@@ -55,7 +55,8 @@ const getHorariosDocente = (req, res) => {
         h.HoraFin,
         h.NumAula,
         c.IdCurso,
-        m.Nombre AS Materia
+        m.IdMateria,
+        m.Nombre AS NombreMateria
       FROM HorarioMateria h
       JOIN CursoMateria cm ON h.IdCurso = cm.IdCurso AND h.IdMateria = cm.IdMateria
       JOIN Materias m ON m.IdMateria = h.IdMateria

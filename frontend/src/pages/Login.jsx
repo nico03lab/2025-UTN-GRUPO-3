@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import RoleSlider from "../components/RoleSlider";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const { login } = useAuth();
@@ -8,6 +9,7 @@ export default function Login() {
   const [pass, setPass] = useState("");
   const [rol, setRol] = useState("Docente");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,14 +24,14 @@ export default function Login() {
         estudiante: "/alumnos",
         directivo: "/directivos",
       };
-      window.location.href = routes[tipo] || "/";
+      navigate(routes[tipo] || "/");
     } catch (err) {
       setError(err?.response?.data?.error || "Error de autenticación");
     }
   };
 
   const handleInscripciones = () => {
-    window.location.href = "/inscripcion";
+    navigate("/inscripcion");
   }; 
 
   return (

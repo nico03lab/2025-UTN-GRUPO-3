@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "../services/axios";
+import {useNavigate} from "react-router-dom"
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-// Provider: envuelve toda tu app
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
 
@@ -34,16 +35,22 @@ export const AuthProvider = ({ children }) => {
     const { data } = await axios.post("/auth/login", { nombreUsuario, pass });
     localStorage.setItem("accessToken", data.accessToken);
     setUser(data.user);
-    console.log("👤 Usuario guardado:", data.user); // 👈 DEBUG
     return data.user;
   };
 
   // Logout: borra token y usuario
   const logout = async () => {
+  try {
     await axios.post("/auth/logout");
+  } catch (err) {
+    console.error("Error cerrando sesión en backend:", err.message);
+  } finally {
     localStorage.removeItem("accessToken");
     setUser(null);
-  };
+    navigate("/");
+  }
+};
+
 
   return (
     <AuthContext.Provider value={{ user, ready, login, logout }}>

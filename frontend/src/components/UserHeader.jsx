@@ -14,7 +14,6 @@ import { ConfiguracionModal } from './ConfiguracionModal';
 export default function UserHeader({
   user,
   onLogout,
-  // Nuevas props para configuración
   userRole,
   fieldsConfig,
   apiEndpoint,
@@ -84,7 +83,7 @@ export default function UserHeader({
         </div>
         <div>
           <div className="text-lg font-bold">{user.name}</div>
-          <div className="text-sm opacity-70">{user.mail}</div>
+          <div className="text-sm opacity-70">{user.email}</div>
         </div>
       </div>
 

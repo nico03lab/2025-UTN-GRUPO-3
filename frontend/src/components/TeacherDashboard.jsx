@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import AttendanceTab from "./AttendanceTab";
 import ScheduleTab from "./ScheduleTab";
 import GradesTab from "./GradesTab";
@@ -6,15 +7,12 @@ import UserHeader from "../components/UserHeader";
 import CourseSidebar from "../components/CourseSidebar";
 import StatsPanel from "../components/Statspanel";
 import axios from "../services/axios";
-
 import docenteService from "../services/DocenteService";
+import {showToast} from "../utils/toast"
 
 export default function TeacherDashboard() {
-  const [user, setUser] = useState(null);
-  const [userLoaded, setUserLoaded] = useState(false); // Estado para controlar si el user está cargado
-
-  const API_BASE_URL = "http://localhost:3002/api";
-
+  const { user, ready, logout } = useAuth();
+  const [userData, setUserData] = useState(null);
   const [viewMode, setViewMode] = useState("cards");
   const [cursos, setCursos] = useState([]);
   const [selectedCurso, setSelectedCurso] = useState(null);
@@ -22,63 +20,48 @@ export default function TeacherDashboard() {
   const [alumnosByCurso, setAlumnosByCurso] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [grades, setGrades] = useState({});
+  const [horarios, setHorarios] = useState({});
   const [notifications] = useState(3);
 
-  const idUsuario = "doc-001"; //asumiendo que se parte de un user
+  const API_BASE_URL = "http://localhost:3002/api";
 
-  const cargarDocente = async () => {
-    try {
-      const response = await docenteService.getDocente(idUsuario); 
-      setUser({
-        dni: response.data.DNIDocente, 
-        userId: response.data.IdUsuario,
-        name: `${response.data.Nombre} ${response.data.Apellido}`,
-        email: response.data.Email,
-      });
-      console.log(' User cargado:', user);
-    } catch (error) {
-      console.error("Error cargando datos del docente/user");
-    } finally {
-      setUserLoaded(true); // Marca como cargado después de intentar cargar
-      checkAllLoaded(); 
-    }
-  };
-
-  // useEffect para cargar el user al montar el componente
+  // Cargar docente cuando el usuario esté listo
   useEffect(() => {
+    if (!ready || !user) return;
+
+    const cargarDocente = async () => {
+      try {
+        const response = await docenteService.getDocente(user.userId);
+        setUserData({
+          dni: response.data.DNIDocente,
+          userId: response.data.IdUsuario,
+          name: `${response.data.Nombre} ${response.data.Apellido}`,
+          email: response.data.Email,
+        });
+      } catch (err) {
+        console.error("Error al cargar docente:", err);
+      }
+    };
+    
     cargarDocente();
-  }, []);
+    
+  }, [ready, user]);
 
-  // Función opcional para verificar si todo está cargado (puedes expandirla si tienes más fetches)
-  const checkAllLoaded = () => {
-    if (userLoaded) {
-      console.log("Todos los datos iniciales cargados");
-    }
-  };
-
+  // Cargar cursos del docente
   useEffect(() => {
-    if (!userLoaded || !user?.dni) return; // Espera a que user esté cargado el user
+    if (!userData?.dni) return;
     axios
-      .get(`${API_BASE_URL}/cursos/${user.dni}`)
+      .get(`${API_BASE_URL}/cursos/${userData.dni}`)
       .then((res) => {
-        console.log("✅ Cursos obtenidos:", res.data);
         setCursos(res.data);
-        if (res.data.length > 0) {
-          setSelectedCurso(res.data[0].IdCurso);
-        }
+        if (res.data.length > 0) setSelectedCurso(res.data[0].IdCurso);
       })
-      .catch((err) => console.error(" Error al obtener cursos:", err));
-  }, [userLoaded, user?.dni]); // Dependencias actualizadas
+      .catch((err) => console.error("Error al obtener cursos:", err));
+  }, [userData?.dni]);
 
-  const toggleAttendance = (dniAlumno) => {
-    setAttendance((prevAttendance) => ({
-      ...prevAttendance,
-      [dniAlumno]: !prevAttendance[dniAlumno],
-    }));
-  };
-
+  // Cargar alumnos del curso seleccionado
   useEffect(() => {
-    if (!userLoaded || !selectedCurso) return; // Espera a que user esté cargado
+    if (!selectedCurso) return;
     axios
       .get(`${API_BASE_URL}/alumnos/${selectedCurso}`)
       .then((res) => {
@@ -88,18 +71,14 @@ export default function TeacherDashboard() {
         setAlumnosByCurso(res.data);
       })
       .catch((err) => console.error(err));
-  }, [userLoaded, selectedCurso]); // Dependencias actualizadas
+  }, [selectedCurso]);
 
-  const [horarios, setHorarios] = useState({});
-
-  // Modifica este useEffect para depender de userLoaded y user.dni
+  // Cargar horarios del docente
   useEffect(() => {
-    if (!userLoaded || !user?.dni) return; // Espera a que user esté cargado
+    if (!userData?.dni) return;
     axios
-      .get(`${API_BASE_URL}/docentes/horarios/${user.dni}`)
+      .get(`${API_BASE_URL}/docentes/horarios/${userData.dni}`)
       .then((res) => {
-        console.log("✅ Horarios del docente:", res.data);
-
         const horariosPorCurso = {};
         res.data.forEach((item) => {
           const idCurso = item.IdCurso;
@@ -109,48 +88,50 @@ export default function TeacherDashboard() {
             dia: item.DiaSemana,
             hora: `${item.HoraInicio} - ${item.HoraFin}`,
             aula: item.NumAula,
-            materia: item.Materia,
+            idMateria: item.IdMateria,
+            materia: item.NombreMateria,
           });
         });
-
         setHorarios(horariosPorCurso);
       })
-      .catch((err) => console.error("❌ Error al obtener horarios:", err));
-  }, [userLoaded, user?.dni]); 
+      .catch((err) => console.error("Error al obtener horarios:", err));
+  }, [userData?.dni]);
 
-  // Falta implementación backend con tabla Asistencias
+  // Lógica de asistencia y calificaciones
+  const toggleAttendance = (dniAlumno) =>
+    setAttendance((prev) => ({
+      ...prev,
+      [dniAlumno]: !prev[dniAlumno],
+    }));
+
   const saveAttendance = () => {
     const payload = {
       curso: selectedCurso,
       fecha: new Date().toISOString().split("T")[0],
+      idMateria: horarios[selectedCurso]?.[0]?.idMateria,
       asistencia: Object.entries(attendance).map(([DNI, Presente]) => ({
         DNI,
         Presente: Presente ? 1 : 0,
       })),
     };
-    console.log("Enviar a backend ->", payload);
-    // Mostrar toast
-    const toast = document.getElementById("toast");
-    toast.classList.add("alert-success", "show");
-    setTimeout(() => toast.classList.remove("show"), 3000);
+    axios.post(`${API_BASE_URL}/asistencias`,payload)
+      .then(res  => {
+        console.log(res.data);
+        showToast("✅ Asistencia guardada correctamente"); 
+      })
+      .catch(err => showToast("❌ Error al guardar asistencia", "error"));
+
   };
 
-  // Implementar backend con tabla Boletines
-  const setGrade = (dni, value) => {
+  const setGrade = (dni, value) =>
     setGrades((prev) => ({ ...prev, [dni]: { ...prev[dni], nota: value } }));
-  };
 
-  const setObs = (dni, value) => {
+  const setObs = (dni, value) =>
     setGrades((prev) => ({ ...prev, [dni]: { ...prev[dni], obs: value } }));
-  };
 
   const saveGrades = () => {
     const payload = { curso: selectedCurso, calificaciones: grades };
     console.log("Enviar calificaciones ->", payload);
-    // Mostrar toast
-    const toast = document.getElementById("toast");
-    toast.classList.add("alert-success", "show");
-    setTimeout(() => toast.classList.remove("show"), 3000);
   };
 
   // Estadísticas para la barra lateral
@@ -160,25 +141,18 @@ export default function TeacherDashboard() {
     calificacionPromedio: 7.8,
   };
 
-  // Si user no está cargado, muestra un loading (opcional, pero recomendado)
-  if (!userLoaded) {
-    return <div className="min-h-screen bg-base-200 flex items-center justify-center">Cargando datos del docente...</div>;
-  }
+  // Render condicional
+  if (!ready) return <div>Cargando autenticación...</div>;
+  if (!userData) return <div>Cargando datos del docente...</div>;
 
   return (
     <div className="min-h-screen bg-base-200">
-      {/* Toast de notificación */}
-      <div id="toast" className="toast toast-top toast-end hidden">
-        <div className="alert alert-info">
-          <span>Operación realizada con éxito.</span>
-        </div>
-      </div>
-
+      
       <div className="max-w-7xl mx-auto p-4 md:p-6">
         <UserHeader
-          user={user}
+          user={userData}
           notifications={notifications}
-          onLogout={() => console.log("Cerrar sesión")}
+          onLogout={logout}
           userRole="Docente"
           fieldsConfig={DocenteField}
           apiEndpoint="docentes/configuracion"
@@ -272,42 +246,87 @@ export const DocenteField = [
   {
     section: "Datos Personales",
     fields: [
-      { name: "DNIDocente", label: "DNI", type: "text", required: true, placeholder: "Ej: 12345678", disabled: true },
-      { name: "Nombre", label: "Nombre", type: "text", required: true, placeholder: "Ej: Juan" },
-      { name: "Apellido", label: "Apellido", type: "text", required: true, placeholder: "Ej: Pérez" },
-      { name: "Email", label: "Email", type: "email", required: true, placeholder: "tutor@email.com" },
-      { name: "TelefonoCel", label: "Teléfono Celular", type: "tel", placeholder: "221-1234567" },
-      { name: "TelefonoLinea", label: "Teléfono Linea", type: "tel", placeholder: "42456789" }
-    ]
+      {
+        name: "DNIDocente",
+        label: "DNI",
+        type: "text",
+        required: true,
+        placeholder: "Ej: 12345678",
+        disabled: true,
+      },
+      {
+        name: "Nombre",
+        label: "Nombre",
+        type: "text",
+        required: true,
+        placeholder: "Ej: Juan",
+      },
+      {
+        name: "Apellido",
+        label: "Apellido",
+        type: "text",
+        required: true,
+        placeholder: "Ej: Pérez",
+      },
+      {
+        name: "Email",
+        label: "Email",
+        type: "email",
+        required: true,
+        placeholder: "tutor@email.com",
+      },
+      {
+        name: "TelefonoCel",
+        label: "Teléfono Celular",
+        type: "tel",
+        placeholder: "221-1234567",
+      },
+      {
+        name: "TelefonoLinea",
+        label: "Teléfono Linea",
+        type: "tel",
+        placeholder: "42456789",
+      },
+    ],
   },
   {
     section: "Dirección",
     fields: [
-      { 
-        name: "Calle", 
-        label: "Calle", 
-        type: "text", 
-        placeholder: "Ej: Calle 50" 
+      {
+        name: "Calle",
+        label: "Calle",
+        type: "text",
+        placeholder: "Ej: Calle 50",
       },
-      { 
-        name: "Numero", 
-        label: "Número", 
-        type: "text", 
-        placeholder: "Ej: 123" 
+      {
+        name: "Numero",
+        label: "Número",
+        type: "text",
+        placeholder: "Ej: 123",
       },
-      { 
-        name: "IdLocalidad", 
-        label: "Provincia y Localidad", 
+      {
+        name: "IdLocalidad",
+        label: "Provincia y Localidad",
         type: "localidad", // Tipo especial
-        className: "md:col-span-2" // Ocupa 2 columnas
+        className: "md:col-span-2", // Ocupa 2 columnas
       },
-    ]
+    ],
   },
   {
     section: "Usuario",
     fields: [
-      { name: "NombreUsuario", label: "Usuario", type: "text", placeholder: "Ej: juanPerez" },
-      { name: "Pass", label: "Contraseña", type: "text", placeholder: "Ej: doc-001" },
-    ]
-  }
+      {
+        name: "NombreUsuario",
+        label: "Usuario",
+        type: "text",
+        placeholder: "Ej: juanPerez",
+      },
+      {
+        name: "Pass",
+        label: "Contraseña",
+        type: "text",
+        placeholder: "Ej: doc-001",
+      },
+    ],
+  },
 ];
