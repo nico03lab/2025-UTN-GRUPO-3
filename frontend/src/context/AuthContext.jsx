@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
     axios
       .get("/auth/me")
-      .then((res) => {
+      .then((res) => { 
         setUser(res.data.user);
       })
       .catch(() => {

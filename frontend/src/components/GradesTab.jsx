@@ -19,7 +19,7 @@ export default function GradesTab({ alumnos, grades, setGrade, setObs, saveGrade
           </thead>
           <tbody>
             {alumnos.map(a => (
-              <tr key={a.DNI}>
+              <tr key={a.DNIAlumno}>
                 <td>
                   <div className="flex items-center gap-3">
                     <div className="avatar">
@@ -29,7 +29,7 @@ export default function GradesTab({ alumnos, grades, setGrade, setObs, saveGrade
                     </div>
                     <div>
                       <div className="font-bold">{a.Apellido}, {a.Nombres}</div>
-                      <div className="text-sm opacity-50">DNI: {a.DNI}</div>
+                      <div className="text-sm opacity-50">DNI: {a.DNIAlumno}</div>
                     </div>
                   </div>
                 </td>
@@ -38,11 +38,11 @@ export default function GradesTab({ alumnos, grades, setGrade, setObs, saveGrade
                     type="number" 
                     placeholder="0-10" 
                     min="0" max="10" step="0.5"
-                    value={grades[a.DNI]?.nota || ''} 
-                    onChange={e => setGrade(a.DNI, e.target.value)} 
+                    value={grades[a.DNIAlumno]?.nota || ''} 
+                    onChange={e => setGrade(a.DNIAlumno, e.target.value)} 
                     className="input input-bordered w-20"
                   />
-                  {grades[a.DNI]?.nota >= 7 && (
+                  {grades[a.DNIAlumno]?.nota >= 7 && (
                     <div className="text-success text-xs mt-1 flex items-center gap-1">
                       <CheckBadgeIcon className="h-4 w-4" />
                       Buen desempeño
@@ -53,8 +53,8 @@ export default function GradesTab({ alumnos, grades, setGrade, setObs, saveGrade
                   <input 
                     type="text" 
                     placeholder="Observaciones" 
-                    value={grades[a.DNI]?.obs || ''} 
-                    onChange={e => setObs(a.DNI, e.target.value)} 
+                    value={grades[a.DNIAlumno]?.obs || ''} 
+                    onChange={e => setObs(a.DNIAlumno, e.target.value)} 
                     className="input input-bordered w-full"
                   />
                 </td>

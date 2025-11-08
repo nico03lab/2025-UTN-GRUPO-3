@@ -3,6 +3,11 @@ import axios from 'axios';
 const API_URL = 'http://localhost:3002/api/alumnos';
 
 const padreService = {
+    getTutorByUser : async (idUsuario) => {
+        const res = await axios.get(`http://localhost:3002/api/tutores/${idUsuario}`);
+        return res.data;
+      },
+
     //obtener al tutor
     getTutor: async (idUsuario) => {
         try{

@@ -9,6 +9,7 @@ import { AlumnosPage } from "./pages/AlumnosPage";
 import { ThemeProvider } from "./components/ThemeContext";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute"
 
 function App() {
   return (
@@ -27,17 +28,25 @@ function App() {
         />
 
         <Routes>
-          <Route path="/" element={<Login></Login>}></Route>
+          {/* Rutas públicas */}
+          <Route path="/" element={<Login />} />
+          <Route path="/inscripcion" element={<InscripcionPage />} />
+
+          {/*Grupo de rutas protegidas */}
           <Route
-            path="/inscripcion"
-            element={<InscripcionPage></InscripcionPage>}
-          ></Route>
-          <Route path="/docente" element={<TeacherDashboard />}></Route>
-          <Route path="/tutores" element={<EstudiantesDashboard />}></Route>
-          <Route path="/alumnos" element={<AlumnosPage />}></Route>
-          <Route path="/directivos" element={<DirectivoDashboard />}></Route>
+            element={
+              <ProtectedRoute
+                allowedRoles={["docente", "padre", "estudiante", "directivo"]}
+              />
+            }
+          >
+            <Route path="/docente" element={<TeacherDashboard />} />
+            <Route path="/tutores" element={<EstudiantesDashboard />} />
+            <Route path="/alumnos" element={<AlumnosPage />} />
+            <Route path="/directivos" element={<DirectivoDashboard />} />
+          </Route>
         </Routes>
-        {/* 🔔 Global Toast visible para toda la app */}
+        {/*Global Toast visible para toda la app */}
         <div id="toast" className="toast toast-top toast-end hidden z-50">
           <div id="toast-alert" className="alert">
             <span id="toast-msg">Mensaje</span>

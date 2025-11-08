@@ -1,41 +1,61 @@
-const db = require('../db/db');
+const db = require("../db/db");
 
 const directivoController = {
-    //obtener datos por el user
-    getDirectivo: async (req,res) => {
-        try{
-        const {idUsuario} = req.params; // Si viene del token o del parámetro
-        const directivo = await db.prepare(`
-            SELECT 
-                Nombre,
-                Apellido,
-                Email,
-                DNIDirectivo,
-                IdUsuario
-            FROM Directivo 
-            WHERE IdUsuario = ?
-            `).get(idUsuario);
-        console.log ("Datos", directivo)
-        res.json({
-            success: true,
-            data: directivo
-        });
-        } catch (error) {
-        console.error('Error obteniendo al directivo:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener al directivo'
-        });
-        }
-    },
+  //obtener datos por el user
+  getDirectivo: async (req, res) => {
+    try {
+      const { idUsuario } = req.params;
+      console.log("📩 getDirectivo() llamado con idUsuario:", idUsuario);
 
+      const directivo = db
+        .prepare(
+          `
+          SELECT 
+            IdUsuario,
+            DNIDirectivo,
+            Nombre,
+            Apellido,
+            Email,
+            Cargo
+          FROM Directivo
+          WHERE IdUsuario = ?
+        `
+        )
+        .get(idUsuario);
 
-    //obtener datos para la modificacion
-    getDirectivoCompleto: async (req,res) => {
-        try{
-        const {idUsuario} = req.params; // Si viene del token o del parámetro
-        console.log("Cargando directivo para la modificaion: ", idUsuario);
-        const directivo = await db.prepare(`
+      console.log("📦 Resultado query:", directivo);
+
+      if (!directivo) {
+        console.log("⚠️ No se encontró el directivo con ese ID");
+        return res
+          .status(404)
+          .json({ success: false, message: "No encontrado" });
+      }
+
+      // Agregamos este log para ver qué exactamente se envía al frontend:
+      console.log("🚀 Enviando respuesta JSON:", {
+        success: true,
+        data: directivo,
+      });
+
+      return res.json({
+        success: true,
+        data: directivo,
+      });
+    } catch (error) {
+      console.error("❌ Error en getDirectivo:", error);
+      res.status(500).json({ success: false, message: "Error interno" });
+    }
+  },
+
+  //obtener datos para la modificacion
+  getDirectivoCompleto: async (req, res) => {
+    try {
+      const { idUsuario } = req.params; // Si viene del token o del parámetro
+      console.log("Cargando directivo para la modificaion: ", idUsuario);
+      const directivo = await db
+        .prepare(
+          `
             SELECT 
                 d.DNIDirectivo,
                 d.Cargo,
@@ -55,40 +75,42 @@ const directivoController = {
             LEFT JOIN Localidades l ON d.IdLocalidad = l.IdLocalidad
             JOIN Usuarios u ON d.IdUsuario = u.IdUsuario
             WHERE d.IdUsuario = ?
-            `).get(idUsuario);
-        console.log ("Datos", directivo)
-        res.json({
-            success: true,
-            data: directivo
-        });
-        } catch (error) {
-        console.error('Error obteniendo al directivo:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener al directivo'
-        });
-        }
-    },
+            `
+        )
+        .get(idUsuario);
+      console.log("Datos", directivo);
+      res.json({
+        success: true,
+        data: directivo,
+      });
+    } catch (error) {
+      console.error("Error obteniendo al directivo:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error al obtener al directivo",
+      });
+    }
+  },
 
-    updateDirectivo: async (req, res) => {
-        try {
-            const { idUsuario } = req.params;
-            console.log("Actualizar directivo: ", idUsuario);
-            const { 
-                Apellido, 
-                Nombre, 
-                Cargo,
-                Email, 
-                TelefonoCel, 
-                TelefonoLinea, 
-                Calle, 
-                Numero,
-                IdLocalidad,
-                NombreUsuario,
-                Pass 
-            } = req.body;
+  updateDirectivo: async (req, res) => {
+    try {
+      const { idUsuario } = req.params;
+      console.log("Actualizar directivo: ", idUsuario);
+      const {
+        Apellido,
+        Nombre,
+        Cargo,
+        Email,
+        TelefonoCel,
+        TelefonoLinea,
+        Calle,
+        Numero,
+        IdLocalidad,
+        NombreUsuario,
+        Pass,
+      } = req.body;
 
-            const stmt = db.prepare(`
+      const stmt = db.prepare(`
                 UPDATE Directivo
                 SET Apellido = ?,
                     Nombre = ?,
@@ -102,51 +124,48 @@ const directivoController = {
                 WHERE IdUsuario = ?
             `);
 
-            const result = stmt.run(
-                Apellido,
-                Nombre,
-                Cargo,
-                Email,
-                TelefonoCel,
-                TelefonoLinea,
-                Calle,
-                Numero,
-                IdLocalidad,
-                idUsuario
-            );
+      const result = stmt.run(
+        Apellido,
+        Nombre,
+        Cargo,
+        Email,
+        TelefonoCel,
+        TelefonoLinea,
+        Calle,
+        Numero,
+        IdLocalidad,
+        idUsuario
+      );
 
-            // Si se proporciona una nueva contraseña, actualizarla
-            if (Pass || NombreUsuario) {
-                const updatePassStmt = db.prepare(`
+      // Si se proporciona una nueva contraseña, actualizarla
+      if (Pass || NombreUsuario) {
+        const updatePassStmt = db.prepare(`
                     UPDATE Usuarios 
                     SET Pass = ? , NombreUsuario = ?
                     WHERE IdUsuario = ?
                 `);
-                updatePassStmt.run(Pass, NombreUsuario, idUsuario);
-            }
+        updatePassStmt.run(Pass, NombreUsuario, idUsuario);
+      }
 
-            if (result.changes === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Directivo no encontrado'
-                });
-            }
+      if (result.changes === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Directivo no encontrado",
+        });
+      }
 
-            res.json({
-                success: true,
-                message: 'Directivo actualizado correctamente'
-            });
-        } catch (error) {
-            console.error('Error actualizando Directivo:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Error al actualizar Directivo'
-            });
-        }
+      res.json({
+        success: true,
+        message: "Directivo actualizado correctamente",
+      });
+    } catch (error) {
+      console.error("Error actualizando Directivo:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error al actualizar Directivo",
+      });
     }
-     
+  },
 };
 
-module.exports = {directivoController};
-
-
+module.exports = { directivoController };

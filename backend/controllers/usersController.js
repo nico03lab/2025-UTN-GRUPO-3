@@ -4,7 +4,7 @@ const db = require("../db/db");
 const getUsuarios = (req, res) => {
   try {
     const sql = `SELECT IdUsuario, NombreUsuario, Tipo FROM Usuarios`;
-    const rows = db.prepare(sql).all(); // 👈 usa .prepare().all()
+    const rows = db.prepare(sql).all();
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -16,7 +16,7 @@ const getUsuarioById = (req, res) => {
   try {
     const { id } = req.params;
     const sql = `SELECT IdUsuario, NombreUsuario, Tipo FROM Usuarios WHERE IdUsuario = ?`;
-    const row = db.prepare(sql).get(id); // 👈 .prepare().get()
+    const row = db.prepare(sql).get(id);
     if (!row) return res.status(404).json({ error: "Usuario no encontrado." });
     res.json(row);
   } catch (err) {

@@ -9,7 +9,7 @@ const directivoService = {
             const response = await axios.get(`${API_URL}/${idUsuario}`);
             return response.data;
         }catch (error){
-            throw error.response?.data || {message: 'Error al obtener al tutor'};
+            throw error.response?.data || {message: 'Error al obtener al directivo'};
         }
     },
 }

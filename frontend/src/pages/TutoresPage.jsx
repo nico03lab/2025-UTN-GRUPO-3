@@ -5,38 +5,30 @@ import { StudentGrade } from "../components/StudentGrade";
 import CalendarTab from "../components/CalendarTab";
 import { useEffect, useState } from "react";
 import MailboxTab from "../components/MailBoxTab";
-import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import {padreController } from ("../controllers/tutoresController");
 
 export const TutoresPage = () => {
   // Estados y datos de ejemplo
-  const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("light");
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        // ID temporal hasta implementar login real
-        const loggedUserId = "tut-003";
+  const { user, ready, logout } = useAuth();
+  const [userData, setUserData] = useState(null);
 
-        const res = await axios.get(
-          `http://localhost:3002/api/usuarios/${loggedUserId}`
-        );
-        const data = res.data;
-
-        if (data && data.IdUsuario) {
-          setUser({
-            idUsuario: data.IdUsuario,
-            name: data.NombreUsuario,
-            email: data.Email || "sin correo",
-            tipo: data.Tipo,
-          });
-        }
-      } catch (error) {
-        console.error("Error al obtener usuario:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
+  const cargarTutor = async () => {
+    try {
+      const response = await padreController.getTutorCompleto(user.userId);
+      const tutorData = response.data;
+      console.log(response.data);
+      setUserData({
+        dni: tutorData.DNITutor,
+        userId: tutorData.IdUsuario,
+        name: `${tutorData.Nombre} ${tutorData.Apellido}`,
+        email: tutorData.Email,
+      });
+    } catch (err) {
+      console.error("Error al cargar tutor:", err);
+    }
+  };
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -44,7 +36,7 @@ export const TutoresPage = () => {
     document.documentElement.setAttribute("data-theme", newTheme);
   };
 
-   const [selectedEstudiante, setSelectedEstudiante] = useState(
+  const [selectedEstudiante, setSelectedEstudiante] = useState(
     estudiantes[0].IdEstudiante
   );
   const [tab, setTab] = useState("schedules");
@@ -66,7 +58,7 @@ export const TutoresPage = () => {
           user={user}
           theme={theme}
           toggleTheme={toggleTheme}
-          onLogout={() => console.log("Cerrar sesión")}
+          onLogout={logout}
           onSettings={() => console.log("Abrir configuración")}
         />
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

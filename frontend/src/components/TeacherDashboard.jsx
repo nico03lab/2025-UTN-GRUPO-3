@@ -129,10 +129,36 @@ export default function TeacherDashboard() {
   const setObs = (dni, value) =>
     setGrades((prev) => ({ ...prev, [dni]: { ...prev[dni], obs: value } }));
 
-  const saveGrades = () => {
-    const payload = { curso: selectedCurso, calificaciones: grades };
-    console.log("Enviar calificaciones ->", payload);
-  };
+  const saveGrades = async () => {
+  const idMateria = horarios[selectedCurso]?.[0]?.idMateria;
+  if (!idMateria) {
+    showToast("⚠️ No se encontró materia para este curso", "error");
+    return;
+  }
+
+  const calificaciones = Object.entries(grades)
+    .filter(([_, v]) => v?.nota)
+    .map(([DNIAlumno, v]) => ({
+      DNIAlumno,
+      nota: parseFloat(v.nota),
+      obs: v.obs || ""
+    }));
+
+  if (calificaciones.length === 0) {
+    showToast("No hay calificaciones para guardar", "error");
+    return;
+  }
+
+  try {
+    const payload = { curso: selectedCurso, idMateria, calificaciones };
+    const res = await axios.post(`${API_BASE_URL}/calificaciones`, payload);
+    showToast("✅ " + res.data.message);
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Error al guardar calificaciones", "error");
+  }
+};
+
 
   // Estadísticas para la barra lateral
   const stats = {
