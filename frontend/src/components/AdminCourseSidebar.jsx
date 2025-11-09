@@ -129,10 +129,10 @@ export default function AdminCourseSidebar({
         />
 
         <SidebarButton
-          icon={<CalendarIcon className="h-5 w-5" />}
-          label="Cronograma Materias"
-          active={tab === "calendar"}
-          onClick={() => setTab("calendar")}
+          icon={<ClipboardDocumentListIcon className="h-5 w-5" />}
+          label="Horarios"
+          active={tab === "schedule"}
+          onClick={() => setTab("schedule")}
           color="neutral"
         />
       </div>

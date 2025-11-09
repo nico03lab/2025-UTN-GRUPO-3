@@ -90,7 +90,7 @@ export default function RoleSlider({ selected, setSelected }) {
               {currentRole.icon}
             </motion.div>
 
-            <p className="text-base font-medium text-gray-100 tracking-wide select-none">
+            <p className="text-base-content font-bold tracking-wide select-none">
               {currentRole.nombre}
             </p>
           </motion.div>

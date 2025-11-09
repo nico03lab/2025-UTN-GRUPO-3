@@ -77,5 +77,153 @@ const updateCursoAlumno = (req, res) => {
   }
 };
 
+const getAlumnoCompleto = (req, res) => {
+  try {
+    const { idUsuario } = req.params;
+    
+    const alumno = db.prepare(`
+      SELECT 
+        a.DNIAlumno,
+        a.Apellido,
+        a.Nombres,
+        a.Email,
+        a.Telefono,
+        a.FechaNacimiento,
+        a.Calle,
+        a.Numero,
+        a.IdLocalidad,
+        a.IdCurso,
+        l.Nombre as Localidad,
+        l.Provincia,
+        c.Nivel,
+        c.Grado,
+        c.Letra,
+        u.NombreUsuario,
+        u.IdUsuario,
+        u.Pass
+      FROM Alumnos a
+      JOIN Localidades l ON a.IdLocalidad = l.IdLocalidad
+      LEFT JOIN Cursos c ON a.IdCurso = c.IdCurso
+      JOIN Usuarios u ON a.IdUsuario = u.IdUsuario
+      WHERE u.IdUsuario = ?
+    `).get(idUsuario);
+    
+    if (!alumno) {
+      return res.status(404).json({ error: 'Alumno no encontrado' });
+    }
+    
+    res.json(alumno);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Error al obtener alumno' });
+  };
+}
 
-module.exports = { getAlumnos, getAlumnosPorCurso , getAlumnoByDNI, createAlumno, updateStateAlumno, updateCursoAlumno};
+const updateAlumno = async (req,res) =>{
+  try {
+    const { idUsuario } = req.params;
+    const { 
+      Apellido, 
+      Nombres, 
+      Email, 
+      Telefono, 
+      Calle, 
+      Numero, 
+      IdLocalidad,
+      NombreUsuario,
+      Pass 
+    } = req.body;
+
+    // Actualizar datos del alumno
+    const stmt = db.prepare(`
+      UPDATE Alumnos 
+      SET Apellido = ?,
+          Nombres = ?,
+          Email = ?,
+          Telefono = ?,
+          Calle = ?,
+          Numero = ?,
+          IdLocalidad = ?
+      WHERE IdUsuario = ?
+    `);
+
+    const result = stmt.run(
+      Apellido, Nombres, Email, Telefono, Calle, Numero, IdLocalidad, idUsuario
+    );
+
+    // Actualizar usuario y/o contraseña
+    if (NombreUsuario || Pass) {
+      const bcrypt = require('bcrypt');
+      
+      if (Pass && NombreUsuario) {
+        const hashedPassword = await bcrypt.hash(Pass, 10);
+        const updateStmt = db.prepare(`
+          UPDATE Usuarios 
+          SET NombreUsuario = ?, Pass = ?
+          WHERE IdUsuario = ?
+        `);
+        updateStmt.run(NombreUsuario, hashedPassword, idUsuario);
+      } else if (Pass) {
+        const hashedPassword = await bcrypt.hash(Pass, 10);
+        const updateStmt = db.prepare(`
+          UPDATE Usuarios 
+          SET Pass = ?
+          WHERE IdUsuario = ?
+        `);
+        updateStmt.run(hashedPassword, idUsuario);
+      } else if (NombreUsuario) {
+        const updateStmt = db.prepare(`
+          UPDATE Usuarios 
+          SET NombreUsuario = ?
+          WHERE IdUsuario = ?
+        `);
+        updateStmt.run(NombreUsuario, idUsuario);
+      }
+    }
+
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Alumno no encontrado' });
+    }
+
+    res.json({ success: true, message: 'Alumno actualizado correctamente' });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Error al actualizar alumno' });
+  };
+}
+
+const getAlumnoUser = async (req, res) =>{
+try{
+      const {idUsuario} = req.params; // Si viene del token o del parámetro
+      console.log("Cargado estudiante con idUser: ", idUsuario );
+      
+      const alumno = await db.prepare(`
+          SELECT 
+              a.Nombres,
+              a.Apellido,
+              a.Email,
+              a.DNIAlumno,
+              a.IdUsuario,
+              c.Nivel,
+              c.Grado,
+              c.Letra,
+              c.IdCurso
+          FROM Alumnos a 
+          LEFT JOIN Cursos c ON a.IdCurso = c.IdCurso
+          WHERE IdUsuario = ?
+          `).get(idUsuario);
+      console.log ("Datos", alumno)
+      res.json({
+          success: true,
+          data: alumno
+      });
+    } catch (error) {
+    console.error('Error obteniendo al alumno:', error);
+    res.status(500).json({
+        success: false,
+        message: 'Error al obtener al alumno'
+    });
+    }
+}
+
+module.exports = { getAlumnos,updateAlumno,getAlumnoCompleto, getAlumnosPorCurso , getAlumnoByDNI, createAlumno, getAlumnoUser, updateStateAlumno, updateCursoAlumno};

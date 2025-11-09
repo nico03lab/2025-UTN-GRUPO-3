@@ -30,24 +30,31 @@ function LegendItem({ color, icon: Icon, text }) {
 }
 
 // Componente principal
-export default function CalendarTab({ dniAlumno }) {
+export default function CalendarTab({ dniAlumno, idCurso }) {  // Agrega idCurso como prop opcional
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
-  // Cargar eventos desde backend
-
+  // Cargar eventos desde backend (elige endpoint según el prop)
   useEffect(() => {
     const fetchEventos = async () => {
       try {
         setLoading(true);
-        const res = await fetch(
-          `http://localhost:3002/api/eventos/alumnos/${dniAlumno}`
-        );
+        let url;
+        if (idCurso) {
+          // Para directivos: eventos del curso
+          url = `http://localhost:3002/api/eventos/cursos/${idCurso}`;
+        } else if (dniAlumno) {
+          // Para estudiantes: eventos del alumno
+          url = `http://localhost:3002/api/eventos/alumnos/${dniAlumno}`;
+        } else {
+          throw new Error("Debe proporcionar dniAlumno o idCurso");
+        }
+
+        const res = await fetch(url);
         if (!res.ok) throw new Error("Error al obtener eventos");
         const data = await res.json();
 
-        // 🔧 Transformar los campos al formato esperado por FullCalendar
+        // Transformar los campos al formato esperado por FullCalendar
         const eventosTransformados = data.map((ev) => ({
           id: ev.IdEvento,
           title: ev.Titulo,
@@ -68,12 +75,12 @@ export default function CalendarTab({ dniAlumno }) {
       }
     };
 
-    fetchEventos();
-  }, [dniAlumno]);
+    if (dniAlumno || idCurso) {
+      fetchEventos();
+    }
+  }, [dniAlumno, idCurso]);  // Dependencias actualizadas
 
-
-  // Normalizar eventos
-
+  // El resto del código permanece igual...
   const eventosNormalizados = useMemo(() => {
     return eventos.map((e) => ({
       ...e,
@@ -91,9 +98,6 @@ export default function CalendarTab({ dniAlumno }) {
     }));
   }, [eventos]);
 
-
-  // Al hacer click en un evento
-
   const handleEventClick = (clickInfo) => {
     const e = clickInfo.event.extendedProps;
     const msg = [
@@ -110,13 +114,8 @@ export default function CalendarTab({ dniAlumno }) {
     alert(msg);
   };
 
-
-  // Render visual con tooltip
-
   const renderEventContent = (eventInfo) => {
     const e = eventInfo.event.extendedProps;
-
-    // Mostrar solo lo que corresponda
     const mostrarMateria = e.tipo === "Examen" || e.tipo === "Clase";
 
     return (
@@ -151,6 +150,7 @@ export default function CalendarTab({ dniAlumno }) {
         theme="light-border"
         arrow={true}
         animation="shift-away"
+        
       >
         <div className="p-1 truncate cursor-pointer">
           <div className="font-bold text-sm">{eventInfo.event.title}</div>
@@ -162,14 +162,11 @@ export default function CalendarTab({ dniAlumno }) {
     );
   };
 
-
-  // Render principal
-
   return (
     <div className="calendar-container">
       <h2 className="text-3xl font-bold mb-6 text-center flex items-center justify-center gap-2">
         <Calendar className="text-blue-600" size={28} />
-        Calendario Académico
+        Calendario Académico {idCurso ? "(Curso)" : "(Alumno)"}
       </h2>
 
       <div className="bg-base-200 p-4 rounded-xl shadow-lg">

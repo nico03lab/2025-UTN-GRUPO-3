@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";  // Agrega axios para llamadas a la API
 import { CalendarIcon, UserGroupIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 
 /**
@@ -6,13 +7,16 @@ import { CalendarIcon, UserGroupIcon, BookOpenIcon } from "@heroicons/react/24/o
  * Permite al directivo filtrar y visualizar asistencias de un curso.
  *
  * Props:
- * - asistencias: array con datos de asistencia (simulados o del backend)
- * - curso: objeto del curso seleccionado
+ * - curso: objeto del curso seleccionado (con IdCurso)
  * - onFilterChange: función opcional para reportar cambios de filtros
  */
-export default function AdminAttendanceTab({ asistencias = [], curso, onFilterChange }) {
+export default function AdminAttendanceTab({ curso, onFilterChange }) {
+  const API_BASE_URL = "http://localhost:3002/api";  // Ajusta si es diferente
+
+  const [asistencias, setAsistencias] = useState([]);  // Datos reales desde la API
   const [materias, setMaterias] = useState([]);
   const [fechas, setFechas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Filtros seleccionados
   const [filtros, setFiltros] = useState({
@@ -20,21 +24,29 @@ export default function AdminAttendanceTab({ asistencias = [], curso, onFilterCh
     fecha: "",
   });
 
-  // 🔹 Simulación inicial de materias y docentes (luego lo traerás del backend)
+  // 🔹 Cargar asistencias desde la API
   useEffect(() => {
-    if (curso) {
-      setMaterias([
-        "Matemática",
-        "Lengua",
-        "Ciencias Naturales",
-        "Inglés",
-      ]);
-      // Fechas simuladas de registros previos de asistencia
-      setFechas([
-        "2025-10-08",
-        "2025-10-09",
-        "2025-10-10",
-      ]);
+    if (curso?.IdCurso) {
+      setLoading(true);
+      axios
+        .get(`${API_BASE_URL}/asistencias/${curso.IdCurso}`)
+        .then((res) => {
+          console.log("Asistencias cargadas:", res.data);
+          setAsistencias(res.data);  // Setear datos reales
+          // Extraer materias y fechas únicas de los datos
+          const uniqueMaterias = [...new Set(res.data.map(a => a.Materia))];
+          const uniqueFechas = [...new Set(res.data.map(a => a.Fecha))];
+          setMaterias(uniqueMaterias);
+          setFechas(uniqueFechas);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error al cargar asistencias:", err);
+          setAsistencias([]);
+          setMaterias([]);
+          setFechas([]);
+          setLoading(false);
+        });
     }
   }, [curso]);
 
@@ -43,12 +55,16 @@ export default function AdminAttendanceTab({ asistencias = [], curso, onFilterCh
     onFilterChange?.(key, value);
   };
 
-  // 🔹 Filtrar asistencias por filtros activos (por ahora simulado)
+  // 🔹 Filtrar asistencias por filtros activos
   const asistenciasFiltradas = asistencias.filter((a) => {
-    const matchMateria = !filtros.materia || a.materia === filtros.materia;
-    const matchFecha = !filtros.fecha || a.fecha === filtros.fecha;
+    const matchMateria = !filtros.materia || a.Materia === filtros.materia;
+    const matchFecha = !filtros.fecha || a.Fecha === filtros.fecha;
     return matchMateria && matchFecha;
   });
+
+  if (loading) {
+    return <div className="p-6 text-center">Cargando asistencias...</div>;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -119,7 +135,7 @@ export default function AdminAttendanceTab({ asistencias = [], curso, onFilterCh
         )}
       </div>
 
-      {/* 📋 Lista de asistencias (simulada) */}
+      {/* 📋 Lista de asistencias */}
       <div className="overflow-x-auto mt-4">
         <table className="table table-sm table-zebra">
           <thead>
@@ -134,17 +150,17 @@ export default function AdminAttendanceTab({ asistencias = [], curso, onFilterCh
             {asistenciasFiltradas.length > 0 ? (
               asistenciasFiltradas.map((a, idx) => (
                 <tr key={idx}>
-                  <td>{a.alumno}</td>
-                  <td>{a.materia}</td>
-                  <td>{a.fecha}</td>
+                  <td>{a.Apellido} {a.Nombres}</td>
+                  <td>{a.Materia}</td>
+                  <td>{a.Fecha}</td>
                   <td>
-                    <input type="checkbox" className="checkbox checkbox-sm" checked={a.presente} readOnly />
+                    <input type="checkbox" className="checkbox checkbox-sm" checked={!!a.Presente} readOnly />
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center opacity-70">
+                <td colSpan={4} className="text-center opacity-70">
                   No hay registros que coincidan con los filtros.
                 </td>
               </tr>

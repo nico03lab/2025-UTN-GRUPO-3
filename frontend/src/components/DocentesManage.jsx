@@ -4,6 +4,8 @@ import { UserGroupIcon} from "@heroicons/react/24/outline";
 import { InputField } from "./InputField";
 import { UserPlus } from 'lucide-react';
 import { toast } from "react-toastify";
+import {SelectLocalidad} from './SelectLocalidad';
+
 
 /**
  * DocentesManage.jsx
@@ -23,18 +25,6 @@ export default function DocentesManage() {
   const [expandido, setExpandido] = useState({});
   const [cursos, setCursos] = useState([]);
 
-  //para la listas desplegables
-  const localidadesOptions = [
-    { value: 'La Plata', label: 'La Plata' },
-    { value: 'Berrisso', label: 'Berisso' },
-    { value: 'Ensenada', label: 'Ensenada' },
-    { value: 'Gonnet', label: 'Gonnet' },
-    { value: 'Ringuelet', label: 'Ringuelet' }
-  ];
-  const provinciaOptions = [
-    { value: 'Buenos Aires', label: 'Buenos Aires' }
-  ];
-
   //para dar de alta un docente 
   const [nuevoDocente, setNuevoDocente] = useState({
     DNIDocente: "",
@@ -53,6 +43,10 @@ export default function DocentesManage() {
 
   // Agrupar docentes por DNI con sus materias
   const docentesAgrupados = useMemo(() => {
+    // Verificación de seguridad: asegurarse de que docentes sea un arreglo
+    if (!Array.isArray(docentes)) {
+      return []; // Retorna un arreglo vacío si no es un arreglo
+    }
     return docentes.reduce((acc, curr) => {
       const existente = acc.find(d => d.DNIDocente === curr.DNIDocente);
       
@@ -98,11 +92,13 @@ export default function DocentesManage() {
     axios
       .get(`${API_BASE_URL}/docentes/materias`)
       .then((res) => {
+        console.log("Respuesta de la API:", res.data); // Agrega esto para depurar
         setDocentes(res.data);
         setLoading(false);
       })
       .catch((err) => {
         console.error("Error al obtener docentes:", err);
+        setDocentes([]); // Resetea a arreglo vacío
         setLoading(false);
       });
   }, []);
@@ -344,22 +340,12 @@ export default function DocentesManage() {
                         onChange={handleInputChange}
                         placeholder="Ej: 440"
                       />
-                      <InputField
-                        label="Localidad"
+                      <SelectLocalidad
+                        label="Provincia y Localidad"
                         name="Localidad"
                         value={nuevoDocente.Localidad}
                         onChange={handleInputChange}
-                        placeholder="Seleccionar localidad"
-                        options={localidadesOptions}
                       />
-                        <InputField
-                          label="Provincia"
-                          name="Provincia"
-                          value={nuevoDocente.Provincia}
-                          onChange={handleInputChange}
-                          placeholder="Seleccionar provincia"
-                          options={provinciaOptions}
-                        />
                     
                     <InputField
                       label="Telefono Celular"

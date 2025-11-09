@@ -65,4 +65,64 @@ const getCursosDisponibles= (req,res) =>{
     res.status(500).json({ error: error.message });
   }
 }
-module.exports = { getCursosPorProfe , getCursoByNivelYTurno, getCursos, getCursosDisponibles};
+const getCalificacionesPorCurso = (req, res) => {
+  try {
+    const { idCurso } = req.params;
+    const rows = db.prepare(`
+      SELECT 
+        a.IdCurso,
+        m.Nombre AS Materia,  -- Nombre de la materia
+        a.DNIAlumno,
+        a.Apellido,
+        a.Nombres,
+        bd.NotaFinal AS NotaMateria,
+        b.Promedio,
+        b.Observaciones
+      FROM Alumnos a
+      JOIN Boletines b ON b.DNIAlumno = a.DNIAlumno
+      JOIN BoletinDetalle bd ON bd.IdBoletin = b.IdBoletin
+      JOIN Materias m ON m.IdMateria = bd.IdMateria
+      WHERE a.IdCurso = ?
+      ORDER BY a.Apellido, a.Nombres, m.Nombre
+    `).all(idCurso);
+    console.log("Calificaciones obtenidas:", rows);
+    res.json(rows);  // Array de objetos
+  } catch (error) {
+    console.error("Error al obtener calificaciones:", error);
+    res.status(500).json({ error: "Error interno al obtener calificaciones" });
+  }
+};
+
+const getHorariosPorCurso = (req, res) => {
+  try {
+    const { idCurso } = req.params;
+    const rows = db.prepare(`
+      SELECT 
+        h.IdCurso,
+        h.DiaSemana AS dia,
+        h.NumAula AS aula,
+        m.Nombre AS materia,
+        h.HoraInicio || '-' || h.HoraFin AS hora
+      FROM HorarioMateria h
+      INNER JOIN Materias m ON h.IdMateria = m.IdMateria
+      WHERE h.IdCurso = ?
+      ORDER BY 
+        CASE h.DiaSemana
+          WHEN 'Lunes' THEN 1
+          WHEN 'Martes' THEN 2
+          WHEN 'Miercoles' THEN 3
+          WHEN 'Jueves' THEN 4
+          WHEN 'Viernes' THEN 5
+        END,
+        h.HoraInicio
+        
+    `).all(idCurso);
+    console.log("Horarios del curso obtenidos:", rows);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error al obtener horarios del curso:", error);
+    res.status(500).json({ error: "Error interno al obtener horarios" });
+  }
+};
+
+module.exports = { getCursosPorProfe , getCursoByNivelYTurno, getHorariosPorCurso, getCursos, getCursosDisponibles, getCalificacionesPorCurso};

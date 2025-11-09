@@ -58,6 +58,7 @@ const padreController ={
                 NombreUsuario,
                 Pass // Si se quiere cambiar la contraseña
             } = req.body;
+            console.log(' Datos recibidos:', { ...req.body, Pass: Pass ? '***' : undefined });
 
             const stmt = db.prepare(`
                 UPDATE Tutores 
@@ -86,12 +87,40 @@ const padreController ={
 
             // Si se proporciona una nueva contraseña, actualizarla
             if (Pass || NombreUsuario) {
-                const updatePassStmt = db.prepare(`
-                    UPDATE Usuarios 
-                    SET Pass = ? , NombreUsuario = ?
-                    WHERE IdUsuario = ?
-                `);
-                updatePassStmt.run(Pass, NombreUsuario, idUsuario);
+                const bcrypt = require('bcrypt');
+
+                if (Pass && NombreUsuario) {
+                    // Actualizar ambos
+                    const hashedPassword = await bcrypt.hash(Pass, 10);
+                    const updateStmt = db.prepare(`
+                        UPDATE Usuarios 
+                        SET NombreUsuario = ?, Pass = ?
+                        WHERE IdUsuario = ?
+                    `);
+                    updateStmt.run(NombreUsuario, hashedPassword, idUsuario);
+                    console.log('Usuario y contraseña actualizados');
+                    
+                } else if (Pass) {
+                    // Solo contraseña
+                    const hashedPassword = await bcrypt.hash(Pass, 10);
+                    const updateStmt = db.prepare(`
+                        UPDATE Usuarios 
+                        SET Pass = ?
+                        WHERE IdUsuario = ?
+                    `);
+                    updateStmt.run(hashedPassword, idUsuario);
+                    console.log('Contraseña actualizada');
+                    
+                } else if (NombreUsuario) {
+                    // Solo nombre de usuario
+                    const updateStmt = db.prepare(`
+                        UPDATE Usuarios 
+                        SET NombreUsuario = ?
+                        WHERE IdUsuario = ?
+                    `);
+                    updateStmt.run(NombreUsuario, idUsuario);
+                    console.log('Nombre de usuario actualizado');
+                }
             }
 
             if (result.changes === 0) {
@@ -205,48 +234,6 @@ const padreController ={
                 success: false,
                 message: 'Error al obtener los hijos'
             });
-        }
-    },
-
-    // Obtener información completa de un hijo
-    getHijoCompleto: async (req, res) => {
-        try {
-        const { estudianteId } = req.params;
-        const padreId = req.user?.id || req.query.padreId;
-
-        // Verificar que el estudiante es hijo del padre
-        const hijos = await PadreModel.getHijos(padreId);
-        const esHijo = hijos.some(h => h.id == estudianteId);
-
-        if (!esHijo) {
-            return res.status(403).json({
-            success: false,
-            message: 'No tienes permiso para ver este estudiante'
-            });
-        }
-
-        // Obtener toda la información
-        const [notas, horarios] = await Promise.all([
-            PadreModel.getNotasEstudiante(estudianteId),
-            PadreModel.getHorariosEstudiante(estudianteId)
-        ]);
-
-        const estudiante = hijos.find(h => h.id == estudianteId);
-
-        res.json({
-            success: true,
-            data: {
-            estudiante,
-            notas,
-            horarios
-            }
-        });
-        } catch (error) {
-        console.error('Error obteniendo información del hijo:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al obtener información del estudiante'
-        });
         }
     },
 

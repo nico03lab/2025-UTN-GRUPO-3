@@ -58,4 +58,33 @@ const createAsistencia = (req, res) => {
   }
 };
 
-module.exports = { createAsistencia };
+const getAsistenciasPorCurso = (req, res) =>{
+  try {
+    const { idCurso } = req.params;
+    const rows = db.prepare(`
+      SELECT 
+        a.IdCurso,
+        a.Fecha,
+        a.IdMateria,
+        m.Nombre AS Materia,  -- Nombre de la materia
+        da.DNIAlumno,
+        al.Apellido,
+		    al.Nombres,
+        da.Presente
+      FROM Asistencias a 
+      JOIN DetalleAsistencia da ON da.IdAsistencia = a.IdAsistencia
+      JOIN Materias m ON m.IdMateria = a.IdMateria  
+      JOIN Alumnos al ON al.DNIAlumno = da.DNIAlumno 
+      WHERE a.IdCurso = ?
+      ORDER BY a.Fecha DESC, al.Apellido
+    `).all(idCurso);
+    console.log("Asistencias obtenidas:", rows);
+    res.json(rows);  // Devuelve el array de objetos
+  } catch (error) {
+    console.error("Error al obtener asistencias:", error);
+    res.status(500).json({ error: "Error interno al obtener asistencias" });
+  }
+}
+
+
+module.exports = { createAsistencia, getAsistenciasPorCurso};

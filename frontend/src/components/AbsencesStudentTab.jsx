@@ -63,7 +63,7 @@ const AbsencesStudentTab = ({ inasistencias, faltasMateria }) => {
                             </td>
                         </tr>
                         {isExpanded && (
-                            <tr>
+                            <tr key={`${item.Materia}-expanded`}>
                                 <td colSpan="4" className="bg-base-200">
                                     <div className="p-4">
                                     <h4 className="font-semibold mb-2">Todas las faltas de {item.Materia}:</h4>

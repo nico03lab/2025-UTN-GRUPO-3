@@ -71,7 +71,7 @@ export default function UserHeader({
   };
 
   const unreadCount = notifications.filter((n) => !n.Leida).length;
-
+  const esDirectivo = userRole === "Directivo" ? true : false ; 
   return (
     <header className="flex items-center justify-between mb-6 bg-base-100 p-4 rounded-box shadow-md transition-all duration-300">
       {/* Avatar y nombre */}
@@ -91,21 +91,24 @@ export default function UserHeader({
       <div className="flex items-center gap-2" ref={dropdownRef}>
         {/* Notificaciones */}
         <div className="relative">
-          <button
-            type="button"
-            className="btn btn-ghost btn-circle"
-            onClick={() => setOpenDropdown((prev) => !prev)}
-            aria-label="Notificaciones"
-          >
-            <div className="indicator">
-              <BellIcon className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="badge badge-xs badge-primary indicator-item">
-                  {unreadCount}
-                </span>
-              )}
-            </div>
-          </button>
+          { !esDirectivo && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-circle"
+              onClick={() => setOpenDropdown((prev) => !prev)}
+              aria-label="Notificaciones"
+            >
+              <div className="indicator">
+                <BellIcon className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="badge badge-xs badge-primary indicator-item">
+                    {unreadCount}
+                  </span>
+                )}
+              </div>
+            </button>
+          )}
+          
 
           {openDropdown && (
             <div className="absolute right-0 mt-3 z-50 w-80 bg-base-200 shadow-2xl rounded-xl overflow-hidden border border-base-300 animate-fade-in">
