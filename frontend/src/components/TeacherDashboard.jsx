@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import AttendanceTab from "./AttendanceTab";
 import ScheduleTab from "./ScheduleTab";
@@ -160,13 +160,6 @@ export default function TeacherDashboard() {
 };
 
 
-  // Estadísticas para la barra lateral
-  const stats = {
-    totalAlumnos: 78,
-    asistenciaPromedio: 92,
-    calificacionPromedio: 7.8,
-  };
-
   // Render condicional
   if (!ready) return <div>Cargando autenticación...</div>;
   if (!userData) return <div>Cargando datos del docente...</div>;
@@ -195,7 +188,7 @@ export default function TeacherDashboard() {
               setTab={setTab}
             />
 
-            <StatsPanel stats={stats} />
+            <StatsPanel idCurso = {selectedCurso}/>
           </aside>
 
           {/* Main */}
@@ -345,13 +338,13 @@ export const DocenteField = [
         name: "NombreUsuario",
         label: "Usuario",
         type: "text",
-        placeholder: "Ej: juanPerez",
+        placeholder: "Nombre de usuario"
       },
       {
         name: "Pass",
         label: "Contraseña",
-        type: "text",
-        placeholder: "Ej: doc-001",
+        type: "passwordProtected", 
+        placeholder: "Nueva contraseña"
       },
     ],
   },

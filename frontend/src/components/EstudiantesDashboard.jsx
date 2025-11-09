@@ -260,7 +260,7 @@ export const TutorField = [
     section: "Usuario",
     fields: [
       { name: "NombreUsuario", label: "Usuario", type: "text" },
-      { name: "Pass", label: "Contraseña", type: "text" },
+      { name: "Pass", label: "Contraseña", type: "passwordProtected", placeholder: "Nueva contraseña" },
     ],
   },
   {

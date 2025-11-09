@@ -1,7 +1,36 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { UserGroupIcon, CheckBadgeIcon, ChartBarIcon } from "@heroicons/react/24/outline";
 
-export default function StatsPanel({ stats }) {
+export default function StatsPanel({ idCurso, stats: propStats }) {
+  const [stats, setStats] = useState(propStats || {
+    totalAlumnos: 0,
+    asistenciaPromedio: 0,
+    calificacionPromedio: "0.0",
+  });
+  const [loading, setLoading] = useState(!!idCurso );
+
+  useEffect(() => {
+    if (idCurso) {
+      // Para directivos: stats por curso
+      fetch(`http://localhost:3002/api/estadisticas/cursos/${idCurso}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setStats(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error cargando stats:", err);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, [idCurso]);
+
+  if (loading) {
+    return <div className="mt-6 bg-base-100 rounded-box p-4 shadow text-center">Cargando estadísticas...</div>;
+  }
+
   return (
     <div className="mt-6 bg-base-100 rounded-box p-4 shadow">
       <div className="mb-3 text-sm font-medium opacity-70">Estadísticas</div>
@@ -11,7 +40,7 @@ export default function StatsPanel({ stats }) {
             <UserGroupIcon className="h-5 w-5 text-primary" />
             <span className="text-sm">Total alumnos</span>
           </div>
-          <span className="font-semibold text-primary">14</span>
+          <span className="font-semibold text-primary">{stats.totalAlumnos}</span>
         </div>
         
         <div className="flex items-center justify-between p-2 rounded-box bg-success bg-opacity-20">

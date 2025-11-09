@@ -17,6 +17,9 @@ import AdminAttendanceTab from "./AdminAttendanceTab";
 import ReportsTab from "../components/ReportsTab";
 import AlumnosManage from "./AlumnosManage";
 import DocentesManage from "./DocentesManage";
+import AdminGradesTab from "./AdminGradesTab";  
+import CalendarTab from "../components/CalendarTab"; 
+import ScheduleTab from "../components/ScheduleTab";
 import { Notebook, Users, SquareUserRound, FileUser } from "lucide-react";
 
 export default function DirectivoDashboard() {
@@ -120,14 +123,6 @@ export default function DirectivoDashboard() {
 
   const updateFilter = (k, v) => setFilters((p) => ({ ...p, [k]: v }));
 
-  const stats = {
-    totalAlumnos: alumnos.length,
-    totalCursos: cursos.length,
-    inscripcionesPendientes: inscripciones.length,
-    asistenciaPromedio: 94.5,
-    promedioGeneral: 8.2,
-  };
-
   // ==============================
   // 🧩 RENDER
   // ==============================
@@ -219,7 +214,7 @@ export default function DirectivoDashboard() {
                 filters={filters}
                 setFilters={setFilters}
               />
-              <StatsPanel stats={stats} />
+              <StatsPanel idCurso = {selectedCurso?.IdCurso}/> 
             </aside>
 
             <main className="lg:col-span-3 flex flex-col gap-4">
@@ -238,6 +233,18 @@ export default function DirectivoDashboard() {
                     curso={selectedCurso}
                     onFilterChange={updateFilter}
                   />
+                )}
+                {tab === "grades" && selectedCurso && (
+                  <AdminGradesTab
+                    curso={selectedCurso}
+                    onFilterChange={updateFilter}
+                  />
+                )}
+                {tab === "calendar" && selectedCurso && (
+                  <CalendarTab idCurso={selectedCurso.IdCurso} />
+                )}
+                {tab === "schedule" && selectedCurso && (
+                  <ScheduleTab idCurso={selectedCurso.IdCurso} />
                 )}
                 {tab === "reports" && <ReportsTab />}
               </div>
@@ -308,8 +315,8 @@ export const DirectivoField = [
   {
     section: "Usuario",
     fields: [
-      { name: "NombreUsuario", label: "Usuario", type: "text" },
-      { name: "Pass", label: "Contraseña", type: "text" },
+      { name: "NombreUsuario", label: "Usuario", type: "text", placeholder: "Nombre de usuario"},
+      { name: "Pass", label: "Contraseña", type: "passwordProtected", placeholder: "Nueva contraseña"},
     ],
   },
 ];

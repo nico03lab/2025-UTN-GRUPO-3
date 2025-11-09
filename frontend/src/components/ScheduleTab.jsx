@@ -7,12 +7,39 @@ import {
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import domToImage from 'dom-to-image'; // En lugar de html2canvas
-import { useRef } from 'react';
+import { useRef, useState, useEffect} from 'react';
 import { toast } from "react-toastify";
 
 
-export default function ScheduleTab({ horarios, viewMode = "cards" }) {
-  const horarioRef = useRef(null); // Referencia al elemento a descarga
+export default function ScheduleTab({ horarios: propHorarios,idCurso, viewMode = "cards" }) {
+  const [horarios, setHorarios] = useState(propHorarios || []);  // Usar prop o estado interno
+  const [loading, setLoading] = useState(!propHorarios && !!idCurso);  // Cargar si no hay prop y hay idCurso
+  const horarioRef = useRef(null);
+// Cargar horarios desde API si se pasa idCurso
+  useEffect(() => {
+    if (idCurso && !propHorarios) {
+      const fetchHorarios = async () => {
+        try {
+          setLoading(true);
+          const res = await fetch(`http://localhost:3002/api/cursos/horarios/${idCurso}`);
+          if (!res.ok) throw new Error("Error al obtener horarios");
+          const data = await res.json();
+          setHorarios(data);
+        } catch (err) {
+          console.error("Error cargando horarios:", err);
+          toast.error("Error al cargar horarios");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchHorarios();
+    }
+  }, [idCurso, propHorarios]);
+
+  if (loading) {
+    return <div className="text-center py-10">Cargando horarios...</div>;
+  }
+
   if (!horarios || horarios.length === 0) {
     return (
       <div className="text-center py-10 opacity-60">

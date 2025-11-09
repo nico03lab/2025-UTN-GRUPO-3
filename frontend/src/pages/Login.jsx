@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import RoleSlider from "../components/RoleSlider";
 import { useNavigate } from "react-router-dom";
+import ThemeToggle from "../components/ThemeToggle";
+import {EyeOff, Eye} from 'lucide-react';
+
 
 export default function Login() {
   const { login } = useAuth();
@@ -9,13 +12,18 @@ export default function Login() {
   const [pass, setPass] = useState("");
   const [rol, setRol] = useState("Docente");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // ⬅️ Agregar loading
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true); // ⬅️ Activar loading
 
     try {
+      console.log('📝 Intentando login con:', { nombreUsuario, rol });
       const user = await login(nombreUsuario, pass);
 
       if (!user) {
@@ -23,6 +31,7 @@ export default function Login() {
         setError("Respuesta inválida del servidor");
         return;
       }
+      console.log('👤 Usuario recibido:', user);
 
       const tipo = (user.Tipo || user.tipo)?.toLowerCase();
       const rolSeleccionado = rol.toLowerCase();
@@ -47,6 +56,8 @@ export default function Login() {
       console.error("❌ Error en login():", err);
 
       setError(err?.response?.data?.error || "Error de autenticación");
+    }finally {
+      setLoading(false); // ⬅️ Desactivar loading
     }
   };
 
@@ -63,6 +74,7 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-10 bg-base-100">
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
+            <ThemeToggle />
             <h1 className="text-3xl font-bold text-primary mb-2">ColeApp 2025</h1>
             <p className="text-gray-600">Sistema de Gestión Educativa</p>
           </div>
@@ -83,18 +95,40 @@ export default function Login() {
               value={nombreUsuario}
               onChange={(e) => setNombreUsuario(e.target.value)}
             />
-            <input
-              type="password"
-              className="input input-bordered w-full focus:input-primary"
-              placeholder="Contraseña"
-              value={pass}
-              onChange={(e) => setPass(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="input input-bordered w-full focus:input-primary"
+                placeholder="Contraseña"
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
 
             <button
               className="btn btn-primary w-full mt-4 hover:bg-primary/90 transition-all duration-300"
+              disabled={loading} // ⬅️ Deshabilitar mientras carga
             >
-              Entrar como {rol}
+              {loading ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Entrando...
+                </>
+              ) : (
+                `Entrar como ${rol}`
+              )}
             </button>
 
             <div className="divider text-xs text-gray-400">o</div>
@@ -104,7 +138,7 @@ export default function Login() {
               onClick={handleInscripciones}
               className="btn btn-outline btn-accent w-full hover:btn-accent hover:text-white transition-all duration-300"
             >
-              📝 Nuevas Inscripciones
+              Nueva Inscripción
             </button>
 
             <p className="text-center text-xs text-gray-500 mt-4">

@@ -139,12 +139,39 @@ const directivoController = {
 
       // Si se proporciona una nueva contraseña, actualizarla
       if (Pass || NombreUsuario) {
-        const updatePassStmt = db.prepare(`
-                    UPDATE Usuarios 
-                    SET Pass = ? , NombreUsuario = ?
-                    WHERE IdUsuario = ?
-                `);
-        updatePassStmt.run(Pass, NombreUsuario, idUsuario);
+        const bcrypt = require('bcrypt');
+        if (Pass && NombreUsuario) {
+            // Actualizar ambos
+            const hashedPassword = await bcrypt.hash(Pass, 10);
+            const updateStmt = db.prepare(`
+                UPDATE Usuarios 
+                SET NombreUsuario = ?, Pass = ?
+                WHERE IdUsuario = ?
+            `);
+            updateStmt.run(NombreUsuario, hashedPassword, idUsuario);
+            console.log('Usuario y contraseña actualizados');
+            
+        } else if (Pass) {
+            // Solo contraseña
+            const hashedPassword = await bcrypt.hash(Pass, 10);
+            const updateStmt = db.prepare(`
+                UPDATE Usuarios 
+                SET Pass = ?
+                WHERE IdUsuario = ?
+            `);
+            updateStmt.run(hashedPassword, idUsuario);
+            console.log('Contraseña actualizada');
+            
+        } else if (NombreUsuario) {
+            // Solo nombre de usuario
+            const updateStmt = db.prepare(`
+                UPDATE Usuarios 
+                SET NombreUsuario = ?
+                WHERE IdUsuario = ?
+            `);
+            updateStmt.run(NombreUsuario, idUsuario);
+            console.log('Nombre de usuario actualizado');
+        }
       }
 
       if (result.changes === 0) {

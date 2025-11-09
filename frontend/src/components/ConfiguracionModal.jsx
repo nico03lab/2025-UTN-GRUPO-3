@@ -95,6 +95,15 @@ export const ConfiguracionModal = ({
         setGuardando(true);
 
         try {
+            const datosActualizados = { ...datos };
+      
+            // Si Pass está vacío o sigue siendo ••••••••, no enviarlo
+            if (!datosActualizados.Pass || datosActualizados.Pass === '••••••••') {
+                delete datosActualizados.Pass;
+                console.log('No se modificó la contraseña, no se enviará');
+            } else {
+                console.log('Se enviará nueva contraseña para hashear');
+            }
             console.log("Datos actualizados: ", datos);
 
             await axios.put(`${API_BASE_URL}/${apiEndpoint}/${userId}`, datos);

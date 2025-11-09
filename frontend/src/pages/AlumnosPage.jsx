@@ -1,117 +1,192 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import UserHeader from "../components/UserHeader";
 import { StudentSidebar } from "../components/StudentSidebar";
 import ScheduleTab from "../components/ScheduleTab";
 import CalendarTab from "../components/CalendarTab";
 import { StudentGrade } from "../components/StudentGrade";
 import MailboxTab from "../components/MailBoxTab";
+import AbsencesStudentTab from "../components/AbsencesStudentTab";
+import alumnoService from "../services/AlumnoService";
 
 export const AlumnosPage = () => {
-  // Datos simulados — luego se reemplazarán con llamadas backend
-  const [user] = useState({
-    name: "Juan Perez",
-    email: "juan.perez@colegio.edu",
-    idUsuario: 101,
-    dni: "12345678",
-  });
+  const { user, ready, logout } = useAuth();
 
-  const [theme, setTheme] = useState("light");
-  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
-  const [notifications] = useState(3);
-
-  // TAB seleccionado
-  const [tab, setTab] = useState("schedule");
-
-  // Horario del alumno
-  const [horario, setHorario] = useState([]);
-  // Calificaciones
+  const [userData, setUserData] = useState(null);
+  const [horarios, setHorarios] = useState([]);
   const [materias, setMaterias] = useState([]);
-  // Eventos del calendario
   const [eventos, setEventos] = useState([]);
-  // Asistencias
-  const [asistencias, setAsistencias] = useState([]);
-  // Notificaciones
-  const [notificaciones, setNotificaciones] = useState([]);
+  const [inasistencias, setInasistencias] = useState([]);
+  const [faltasPorMateria, setFaltasPorMateria] = useState([]);
+  const [tab, setTab] = useState("schedule");
+  const [loading, setLoading] = useState(true);
 
-  // Simulación de fetchs (futuros endpoints)
+  // --- Cargar alumno al iniciar sesión ---
   useEffect(() => {
-    // 🔹 Horario
-    setHorario([
-      { dia: "Lunes", hora: "08:00 - 09:30", materia: "Matemática", aula: "A101" },
-      { dia: "Martes", hora: "10:00 - 11:30", materia: "Historia", aula: "B202" },
-      { dia: "Miércoles", hora: "08:00 - 09:30", materia: "Inglés", aula: "A102" },
-    ]);
+    if (!ready || !user) return;
+    console.log("Usuario autenticado desde AuthContext:", user);
+    cargarAlumno();
+  }, [ready, user]);
 
-    // 🔹 Calificaciones
-    setMaterias([
-      { IdMateria: 1, Materia: "Matemática", Docente: "Martín López", Nota: "8", Obs: "Buen desempeño" },
-      { IdMateria: 2, Materia: "Historia", Docente: "Laura Gómez", Nota: "10", Obs: "Excelente" },
-      { IdMateria: 3, Materia: "Inglés", Docente: "Ana Torres", Nota: "9", Obs: "Muy bueno" },
-    ]);
+  const cargarAlumno = async () => {
+    try {
+      const response = await alumnoService.getAlumno(user.userId);
+      const alumno = response.data.data || response.data;  // Si está anidado, usa response.data.data
+      console.log("Alumno extraído:", alumno);
+      
+      setUserData({
+        dni: alumno.DNIAlumno,
+        userId: alumno.IdUsuario,
+        name: `${alumno.Nombres} ${alumno.Apellido}`,
+        email: alumno.Email,
+        curso: `${alumno.Nivel} ${alumno.Grado}º ${alumno.Letra}`,
+        idCurso: alumno.IdCurso,
+      });
 
-    // 🔹 Eventos (proximamente desde backend /api/eventos/alumno/:id)
-    setEventos([
-      {
-        id: 1,
-        title: "Entrega de Proyecto de Matemática",
-        start: new Date(),
-        end: new Date(),
-        extendedProps: {
-          materia: "Matemática",
-          tipo: "entrega",
-          descripcion: "Proyecto final de geometría",
-        },
-        color: "#3b82f6",
-      },
-      {
-        id: 2,
-        title: "Examen de Historia",
-        start: new Date(new Date().setDate(new Date().getDate() + 2)),
-        end: new Date(new Date().setDate(new Date().getDate() + 2)),
-        extendedProps: {
-          materia: "Historia",
-          tipo: "examen",
-          descripcion: "Parcial del segundo trimestre",
-        },
-        color: "#ef4444",
-      },
-    ]);
+    } catch (error) {
+      console.error("Error cargando datos del alumno:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // --- Cargar datos del alumno ---
+  useEffect(() => {
+    if (userData?.dni) {
+      cargarHorarios(userData.dni);
+      cargarNotas(userData.dni);
+      cargarInasistencias(userData.dni);
+    }
+  }, [userData?.dni]);
 
-    // 🔹 Asistencias (presente/ausente)
-    setAsistencias([
-      { fecha: "2025-10-10", materia: "Historia", estado: "Presente" },
-      { fecha: "2025-10-11", materia: "Matemática", estado: "Ausente" },
-      { fecha: "2025-10-12", materia: "Inglés", estado: "Presente" },
-    ]);
+  const cargarHorarios = async (dniAlumno) => {
+    try {
+      console.log("Cargando horarios del alumno:", dniAlumno);
+      const response = await alumnoService.getHorarios(dniAlumno);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Error al cargar horarios");
+      }
+      
+      const horariosArray = response.data.data.map((h) => ({
+        IdCurso: h.IdCurso,
+        dia: h.DiaSemana,
+        hora: `${h.HoraInicio} - ${h.HoraFin}`,
+        aula: h.NumAula,
+        materia: h.Materia,
+      }));
+      setHorarios(horariosArray);
+    } catch (err) {
+      console.error("Error al cargar los horarios:", err);
+    }
+  };
 
-    // 🔹 Notificaciones
-    setNotificaciones([
-      { id: 1, mensaje: "Recordatorio: entrega de proyecto el lunes", fecha: "2025-10-11", tipo: "Aviso" },
-      { id: 2, mensaje: "Se publica nueva nota en Matemática", fecha: "2025-10-10", tipo: "Nota" },
-      { id: 3, mensaje: "Reunión general el viernes", fecha: "2025-10-09", tipo: "Evento" },
-    ]);
-  }, []);
+  const cargarNotas = async (dniAlumno) => {
+    try {
+      console.log("📋 Cargando notas del alumno:", dniAlumno);
+      const response = await alumnoService.getNotas(dniAlumno);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Error al cargar notas");
+      }
+      
+      const notasArray = response.data.data.map((h) => ({
+        Materia: h.Materia,
+        Docente: `${h.Profesor_nombre} ${h.Profesor_apellido}`,
+        NotaTrimestral1: h.NotaTrimestral1,
+        NotaTrimestral2: h.NotaTrimestral2,
+        NotaTrimestral3: h.NotaTrimestral3,
+        NotaFinal: h.NotaFinal,
+        Obs: h.Observaciones,
+      }));
+      setMaterias(notasArray);
+    } catch (error) {
+      console.error("❌ Error al cargar las notas:", error);
+    }
+  };
+  
 
+  const cargarInasistencias = async (dniAlumno) => {
+    try {
+      console.log("🚸 Cargando inasistencias del alumno:", dniAlumno);
+      const response = await alumnoService.getInasistencias(dniAlumno);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Error al cargar inasistencias");
+      }
+      
+      const inasistenciasArray = response.data.data.map((h) => ({
+        IdCurso: h.IdCurso,
+        Materia: h.Materia,
+        Fecha: h.Fecha,
+        Presente: h.Presente ? "Presente" : "Ausente",
+      }));
+
+      // Contar faltas por materia
+      const faltasContadas = response.data.data.reduce((acc, h) => {
+        if (!h.Presente) {
+          acc[h.Materia] = (acc[h.Materia] || 0) + 1;
+        }
+        return acc;
+      }, {});
+
+      const faltasPorMateriaArray = Object.entries(faltasContadas).map(
+        ([materia, faltas]) => ({
+          Materia: materia,
+          TotalFaltas: faltas,
+        })
+      );
+
+      setInasistencias(inasistenciasArray);
+      setFaltasPorMateria(faltasPorMateriaArray);
+    } catch (error) {
+      console.error("❌ Error al cargar inasistencias:", error);
+    }
+  };
+
+  // --- Loader inicial ---
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  // --- Render principal ---
   return (
+    
     <div className="bg-base-200 min-h-screen">
       <div className="max-w-7xl mx-auto p-4 md:p-6">
-        {/* HEADER */}
-        <UserHeader
-          user={user}
-          notifications={notifications}
-          theme={theme}
-          toggleTheme={toggleTheme}
-          onLogout={() => console.log("Cerrar sesión")}
-          onSettings={() => console.log("Abrir configuración")}
-        />
+        {userData ? (
+          <UserHeader
+            user={userData}
+            onLogout={logout}
+            userRole="Alumno"
+            fieldsConfig={AlumnoField}
+            apiEndpoint="alumnos/configuracion/user"
+          />
+        ) : (
+          <div className="bg-base-100 p-4 rounded-box shadow text-center">
+            Cargando datos del usuario...
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* SIDEBAR */}
+          {/* SIDEBAR - Para alumno, solo muestra su info */}
           <aside className="lg:col-span-1">
             <StudentSidebar
-              estudiantes={[{ ...user, Nombre: user.name, Grado: "4°A" }]}
-              selectedEstudiante={user.idUsuario}
-              setSelectedEstudiante={() => {}}
+              estudiantes={userData ? [{
+                IdEstudiante: userData.dni,
+                Nombre: userData.name.split(' ')[0] || userData.name,  // Primera parte del nombre (e.g., "María")
+                Apellido: userData.name.split(' ')[1] || "",  // Segunda parte (e.g., "González")
+                Grado: userData.curso.split(' ')[1] + ' ' + userData.curso.split(' ')[2] || userData.curso,  // "1º A"
+                Nivel: userData.curso.split(' ')[0] || "",  // "Secundario"
+                color: "primary",
+                dni: userData.dni
+              }] : []}
+              selectedEstudiante={userData?.dni}
+              setSelectedEstudiante={() => {}} // El alumno no puede cambiar
               tab={tab}
               setTab={setTab}
             />
@@ -120,65 +195,22 @@ export const AlumnosPage = () => {
           {/* MAIN */}
           <main className="lg:col-span-3">
             <div className="bg-base-100 p-4 md:p-6 rounded-box shadow">
-              {tab === "schedule" && <ScheduleTab horarios={horario} />}
+              {tab === "schedule" && <ScheduleTab horarios={horarios} />}
 
               {tab === "notes" && <StudentGrade materias={materias} />}
 
-              {tab === "attendance" && (
-                <div>
-                  <h2 className="text-2xl font-bold mb-4">Asistencias</h2>
-                  <table className="table w-full">
-                    <thead>
-                      <tr>
-                        <th>Fecha</th>
-                        <th>Materia</th>
-                        <th>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {asistencias.map((a, i) => (
-                        <tr key={i}>
-                          <td>{a.fecha}</td>
-                          <td>{a.materia}</td>
-                          <td
-                            className={
-                              a.estado === "Presente"
-                                ? "text-green-600 font-semibold"
-                                : "text-red-600 font-semibold"
-                            }
-                          >
-                            {a.estado}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              {tab === "absences" && (
+                <AbsencesStudentTab
+                  inasistencias={inasistencias}
+                  faltasMateria={faltasPorMateria}
+                />
               )}
 
-              {tab === "calendar" && <CalendarTab eventos={eventos} />}
+              {tab === "calendar" && (
+                <CalendarTab dniAlumno={userData?.dni || ""} />
+              )}
 
               {tab === "mailbox" && <MailboxTab />}
-
-              {tab === "notifications" && (
-                <div>
-                  <h2 className="text-2xl font-bold mb-4">Notificaciones</h2>
-                  <ul className="space-y-3">
-                    {notificaciones.map((n) => (
-                      <li
-                        key={n.id}
-                        className="p-3 rounded-lg bg-base-200 shadow-sm flex justify-between"
-                      >
-                        <div>
-                          <p className="font-semibold">{n.tipo}</p>
-                          <p>{n.mensaje}</p>
-                        </div>
-                        <span className="text-xs opacity-60">{n.fecha}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           </main>
         </div>
@@ -190,3 +222,76 @@ export const AlumnosPage = () => {
     </div>
   );
 };
+
+// --- Configuración de campos del alumno ---
+export const AlumnoField = [
+  {
+    section: "Datos Personales",
+    fields: [
+      { 
+        name: "DNIAlumno", 
+        label: "DNI", 
+        type: "text", 
+        required: true, 
+        disabled: true 
+      },
+      { 
+        name: "Nombres", 
+        label: "Nombres", 
+        type: "text", 
+        required: true 
+      },
+      { 
+        name: "Apellido", 
+        label: "Apellido", 
+        type: "text", 
+        required: true 
+      },
+      { 
+        name: "Email", 
+        label: "Email", 
+        type: "email" 
+      },
+      { 
+        name: "Telefono", 
+        label: "Teléfono", 
+        type: "tel" 
+      },
+      { 
+        name: "FechaNacimiento", 
+        label: "Fecha de Nacimiento", 
+        type: "date",
+        disabled: true 
+      },
+    ],
+  },
+  {
+    section: "Dirección",
+    fields: [
+      { name: "Calle", label: "Calle", type: "text" },
+      { name: "Numero", label: "Número", type: "text" },
+      {
+        name: "IdLocalidad",
+        label: "Provincia y Localidad",
+        type: "localidad",
+        className: "md:col-span-2",
+      },
+    ],
+  },
+  {
+    section: "Usuario",
+    fields: [
+      { 
+        name: "NombreUsuario", 
+        label: "Usuario", 
+        type: "text",
+      },
+      { 
+        name: "Pass", 
+        label: "Contraseña", 
+        type: "passwordProtected", 
+        placeholder: "Nueva contraseña" 
+      },
+    ],
+  },
+];

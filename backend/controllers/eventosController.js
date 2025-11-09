@@ -101,7 +101,7 @@ const getEventos = (req, res) => {
 const getEventosPorCurso = (req, res) => {
   try {
     const { idCurso } = req.params;
-    const rows = stmts.getEventosPorCurso.all(idCurso, idCurso);
+    const rows = stmts.getEventosPorCurso.all(idCurso);
     res.json(rows);
   } catch (err) {
     console.error("getEventosPorCurso:", err);
