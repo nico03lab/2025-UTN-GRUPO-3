@@ -38,7 +38,7 @@ cd 2025-UTN-GRUPO-3
 
 ### 2. Tener instalado:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [Node.js 18+](https://nodejs.org/en) (solo si se quiere, docker tambien los teienDocker)
+- [Node.js 18+](https://nodejs.org/en) (Sin docker)
 - [Git](https://git-scm.com/)
 
 ### 3. Configurar variables de entorno:
