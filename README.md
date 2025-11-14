@@ -45,17 +45,20 @@ En el **backend**, crear el archivo `.env` con el siguiente contenido:
 ```bash
     DB_PATH=./db/sistema_escolar.db
     PORT=3002
-    NODE_ENV=development````
+    NODE_ENV=development
+```
 
 En el **fronted**, crear el archivo .env con el siguiente contenido
 ```bash
     REACT_APP_API_URL=http://backend:5000
     PORT=3000
-    NODE_ENV=development````
+    NODE_ENV=development
+```
 
 ### 4. Construir y levantar los contenedores
 ```bash
-	docker compose up --build````
+	docker compose up --build
+````
 
 Este comando:
 - Construye las imágenes del **frontend** y **backend**.  
@@ -65,8 +68,6 @@ Este comando:
 ### 5. Verificar que todo funcione
 - Frontend → [http://localhost:3000](http://localhost:3000)  
 - Backend → [http://localhost:3002](http://localhost:3002)
-
----
 
 ### 6. Ejecutar sin docker
 # Backend
