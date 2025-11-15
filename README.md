@@ -115,7 +115,7 @@ docker compose logs -f
 #### Integrante 3: Martinez Yanina         | Usuario GitHub: https://github.com/yamartinez03
 #### Integrante 4: Morinigo Roger          | Usuario GitHub: https://github.com/rfmorinigo
 
-##Arquitectura de Software
+## Arquitectura de Software
 ```mermaid
 graph TD
     subgraph "CLIENTE (Frontend)"
